@@ -41,7 +41,7 @@
 #define ENABLE_LOG 0
 #define VERBOSE 0
 
-
+#ifndef ANDROID
 #define LOG(err, fmt, ...) \
   do { \
     if(ENABLE_LOG) \
@@ -66,3 +66,17 @@
 #define LOGW(fmt, ...) LOG("W", fmt, ## __VA_ARGS__)
 #define LOGE(fmt, ...) LOG("E", fmt, ## __VA_ARGS__)
 
+#else /* ANDROID */
+#include <utils/Log.h>
+
+#if VERBOSE
+/* LOG_NDEBUG should be 0 to make LOGV working */
+#define LOG_NDEBUG 0
+#endif /* VERBOSE */
+
+#define LOGV(fmt, ...) ALOGV(fmt, ## __VA_ARGS__)
+#define LOGI(fmt, ...) ALOGI(fmt, ## __VA_ARGS__)
+#define LOGW(fmt, ...) ALOGW(fmt, ## __VA_ARGS__)
+#define LOGE(fmt, ...) ALOGE(fmt, ## __VA_ARGS__)
+
+#endif /* ANDROID */
