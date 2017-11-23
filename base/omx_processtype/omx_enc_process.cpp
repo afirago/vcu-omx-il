@@ -354,6 +354,7 @@ ProcessEncode::ProcessEncode(OMX_HANDLETYPE hComponent, CodecType* pCodec)
   m_ThreadComponent = std::thread(&ProcessEncode::ThreadComponent, this);
 
   m_state = OMX_StateLoaded;
+  m_TargetState = OMX_StateLoaded;
 }
 
 void ProcessEncode::ComponentDeInit()
@@ -1389,6 +1390,9 @@ OMX_ERRORTYPE ProcessEncode::UseBuffer(OMX_OUT OMX_BUFFERHEADERTYPE** ppBufferHd
 
   *ppBufferHdr = BufferHeader;
 
+  if (AllocateDone())
+    checkTransitions();
+
   return eRet;
 }
 
@@ -1427,12 +1431,44 @@ OMX_ERRORTYPE ProcessEncode::AllocateBuffer(OMX_OUT OMX_BUFFERHEADERTYPE** ppBuf
 
   *ppBufferHdr = BufferHeader;
 
+  if (AllocateDone())
+    checkTransitions();
+
   return eRet;
 }
 
 ComponentThreadTask* ProcessEncode::ReceiveTask()
 {
   return m_ComponentTaskQueue.pop();
+}
+
+void ProcessEncode::onChangeState(OMX_STATETYPE newState)
+{
+  LOGV("requesting change from %d to %d", m_state, newState);
+  OMX_EVENTTYPE newEvtCmd = OMX_EventCmdComplete;
+
+  if (m_state == OMX_StateLoaded
+          && m_TargetState == OMX_StateIdle
+          && newState == OMX_StateLoaded) {
+      // OMX specifically allows "canceling" a state transition from loaded
+      // to idle. Pretend we made it to idle, and go back to loaded
+      LOGV("load->idle canceled");
+      m_state = m_TargetState = OMX_StateIdle;
+      newState = OMX_StateLoaded;
+  }
+
+  // Delete Encoder
+  if((newState == OMX_StateIdle) &&
+    (m_state == OMX_StateExecuting) && m_hEncoder)
+      DestroyEncoder();
+
+  // Create Encoder
+  if((newState == OMX_StateExecuting) &&
+    (m_state == OMX_StateIdle))
+      CreateEncoder();
+
+  m_TargetState = newState;
+  checkTransitions();
 }
 
 void ProcessEncode::ThreadComponent()
@@ -1445,34 +1481,8 @@ void ProcessEncode::ThreadComponent()
     {
     case ProcessSetComponentState:
     {
-      LOGI("SetComponentState");
       OMX_STATETYPE newState = (OMX_STATETYPE)((uintptr_t)(ThreadTask->data));
-      OMX_EVENTTYPE newEvtCmd = OMX_EventCmdComplete;
-
-      // Delete Encoder
-      if((newState == OMX_StateIdle) &&
-         (m_state == OMX_StateExecuting) && m_hEncoder)
-        DestroyEncoder();
-
-      // Create Encoder
-      if((newState == OMX_StateExecuting) &&
-         (m_state == OMX_StateIdle))
-      {
-        auto isCreated = CreateEncoder();
-
-        if(!isCreated)
-        {
-          newState = OMX_StateInvalid;
-          newEvtCmd = OMX_EventError;
-        }
-      }
-
-      m_MutexState.lock();
-      m_state = newState;
-      m_MutexState.unlock();
-
-      m_pCallback->EventHandler(m_hComponent, m_pAppData, newEvtCmd, OMX_CommandStateSet, newState, nullptr);
-
+      onChangeState(newState);
       break;
     }
     case ProcessFlush:

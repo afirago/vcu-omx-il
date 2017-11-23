@@ -36,6 +36,34 @@
 ******************************************************************************/
 
 #include "omx_processtype.h"
+#include "base/omx_utils/omx_log.h"
+
+void ProcessType::checkTransitions()
+{
+  if (m_state != m_TargetState) {
+
+    bool transitionComplete = true;
+
+    if (m_state == OMX_StateLoaded) {
+      // OMX requires that all buffers should be allocated
+      // before transition from Loaded to Idle completes
+      if (m_TargetState == OMX_StateIdle)
+        if (!AllocateDone())
+          transitionComplete = false;
+    } else if (m_TargetState == OMX_StateLoaded) {
+      // TODO
+    }
+
+    if (transitionComplete) {
+      LOGV("state transition from %d to %d complete", m_state, m_TargetState);
+      m_state = m_TargetState;
+
+      m_pCallback->EventHandler(m_hComponent, m_pAppData, OMX_EventCmdComplete, OMX_CommandStateSet, m_state, nullptr);
+    } else {
+      LOGV("state transition from %d to %d not yet complete", m_state, m_TargetState);
+    }
+  }
+}
 
 OMX_ERRORTYPE ProcessType::FreeBuffer(OMX_IN OMX_U32 nPortIndex, OMX_IN OMX_BUFFERHEADERTYPE* pBufferHdr)
 {
@@ -46,6 +74,7 @@ OMX_ERRORTYPE ProcessType::FreeBuffer(OMX_IN OMX_U32 nPortIndex, OMX_IN OMX_BUFF
 
   port->destroyBuffer(pBufferHdr);
 
+  checkTransitions();
   return OMX_ErrorNone;
 }
 
@@ -60,3 +89,43 @@ Port* ProcessType::GetPort(OMX_U32 const nPortIndex)
   return nullptr;
 }
 
+bool ProcessType::AllocateInputDone()
+{
+  // we consider allocation is done if port is disabled
+  if (inPort.getDefinition().bEnabled == OMX_FALSE)
+    return true;
+
+  // if no buffers to be allocated we consider allocation is done
+  if (inPort.getDefinition().nBufferCountActual == 0)
+    return true;
+
+  // otherwise it should be populated
+  if (inPort.getDefinition().bPopulated == OMX_TRUE)
+    return true;
+
+  return false;
+}
+
+bool ProcessType::AllocateOutputDone()
+{
+  // we consider allocation is done if port is disabled
+  if (outPort.getDefinition().bEnabled == OMX_FALSE)
+    return true;
+
+  // if no buffers to be allocated we consider allocation is done
+  if (outPort.getDefinition().nBufferCountActual == 0)
+    return true;
+
+  // otherwise it should be populated
+  if (outPort.getDefinition().bPopulated == OMX_TRUE)
+    return true;
+
+  return false;
+}
+
+bool ProcessType::AllocateDone()
+{
+  if (AllocateInputDone() && AllocateOutputDone())
+    return true;
+  return false;
+}

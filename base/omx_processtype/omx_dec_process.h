@@ -209,5 +209,7 @@ private:
 
   friend void RedirectionResolutionFound(int const iBuffersNeeded, int const iBufferSize, int const iWidth, int const iHeight, AL_TCropInfo const tCropInfo, TFourCC const tFourCC, void* pParam);
   void ResolutionFound(int const BufferNumber, int const BufferSize, int const iWidth, int const iHeight, AL_TCropInfo const tCropInfo, TFourCC const tFourCC);
+
+  void onChangeState(OMX_STATETYPE state);
 };
 

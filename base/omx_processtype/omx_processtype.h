@@ -112,6 +112,7 @@ protected:
   OMX_HANDLETYPE m_hComponent;
   bool m_bUseVCU;
   OMX_STATETYPE m_state;
+  OMX_STATETYPE m_TargetState;
   OMX_CALLBACKTYPE* m_pCallback;
   CodecType* m_pCodec;
   OMX_PTR m_pAppData;
@@ -150,7 +151,12 @@ protected:
 
   virtual void ThreadComponent() = 0;
   virtual OMX_ERRORTYPE SetupIpDevice() = 0;
+  virtual void onChangeState(OMX_STATETYPE newState) = 0;
 
+  virtual bool AllocateDone();
+  virtual bool AllocateInputDone();
+  virtual bool AllocateOutputDone();
+  virtual void checkTransitions();
 private:
   /* Variables */
 

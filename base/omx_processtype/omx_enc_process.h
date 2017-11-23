@@ -138,5 +138,7 @@ private:
 
   friend void RedirectionFrameEncode(void* pUserParam, AL_TBuffer* pStream, AL_TBuffer const* const pSrc);
   void FrameEncode(AL_TBuffer* pStream, AL_TBuffer const* const pSrc);
+
+  void onChangeState(OMX_STATETYPE state);
 };
 
