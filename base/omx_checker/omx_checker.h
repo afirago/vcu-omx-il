@@ -145,6 +145,10 @@ public:
   inline
   void CheckHeaderVersion(OMX_VERSIONTYPE const version)
   {
+    /* FIXME. skip version checking for the Android case for now */
+#ifdef ANDROID
+    return;
+#endif
     if(version.nVersion != OMX_VERSION)
       throw OMX_ErrorVersionMismatch;
   };
