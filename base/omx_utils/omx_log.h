@@ -41,13 +41,7 @@
 #define ENABLE_LOG 0
 #define VERBOSE 0
 
-#if __ANDROID_API__
-#define AllegroLOGV ALOGV
-#define AllegroLOGI ALOGI
-#define AllegroLOGW ALOGW
-#define AllegroLOGE ALOGE
-#else
-
+#ifndef ANDROID
 #define LOG(err, fmt, ...) \
   do { \
     if(ENABLE_LOG) \
@@ -68,8 +62,21 @@
 #else
 #define LOGV(fmt, ...) ((void)0)
 #endif
+
 #define LOGI(fmt, ...) LOG("I", fmt, ## __VA_ARGS__)
 #define LOGW(fmt, ...) LOG("W", fmt, ## __VA_ARGS__)
 #define LOGE(fmt, ...) LOG("E", fmt, ## __VA_ARGS__)
-#endif
 
+#else /* ANDROID */
+#if VERBOSE
+/* LOG_NDEBUG should be 0 to make LOGV working */
+#define LOG_NDEBUG 0
+#endif /* VERBOSE */
+#include <utils/Log.h>
+
+#define LOGV(fmt, ...) ALOGV(fmt, ## __VA_ARGS__)
+#define LOGI(fmt, ...) ALOGI(fmt, ## __VA_ARGS__)
+#define LOGW(fmt, ...) ALOGW(fmt, ## __VA_ARGS__)
+#define LOGE(fmt, ...) ALOGE(fmt, ## __VA_ARGS__)
+
+#endif /* ANDROID */
