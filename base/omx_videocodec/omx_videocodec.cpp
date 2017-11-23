@@ -39,6 +39,7 @@
 
 #include <assert.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define ALLEGRODVT_OMX_VERSION 3
 
