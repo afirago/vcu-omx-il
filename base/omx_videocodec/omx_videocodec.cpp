@@ -295,10 +295,19 @@ OMX_ERRORTYPE OMXVideoCodec::GetComponentVersion(OMX_OUT OMX_STRING name, OMX_OU
   }
 }
 
-OMX_ERRORTYPE OMXVideoCodec::GetConfig(OMX_IN OMX_INDEXTYPE /* index */, OMX_INOUT OMX_PTR /* config*/)
+OMX_ERRORTYPE OMXVideoCodec::GetConfig(OMX_IN OMX_INDEXTYPE index, OMX_INOUT OMX_PTR config)
 {
-  std::lock_guard<std::mutex> lock(mutex);
-  return OMX_ErrorNotImplemented;
+  try
+  {
+    std::lock_guard<std::mutex> lock(mutex);
+    OMXChecker::CheckNotNull(config);
+    OMXChecker::CheckStateOperation(AL_GetConfig, process->GetState());
+    return process->GetConfig(index, config);
+  }
+  catch(OMX_ERRORTYPE e)
+  {
+    return e;
+  }
 }
 
 OMX_ERRORTYPE OMXVideoCodec::SetConfig(OMX_IN OMX_INDEXTYPE /* index */, OMX_IN OMX_PTR /* config */)

@@ -105,6 +105,7 @@ public:
   virtual OMX_ERRORTYPE GetExtensionIndex(OMX_IN OMX_STRING /* cParameterName */, OMX_OUT OMX_INDEXTYPE* /* pIndexType */) = 0;
   virtual OMX_ERRORTYPE ComponentTunnelRequest(OMX_IN OMX_U32 /* nPort */, OMX_IN OMX_HANDLETYPE /* hTunneledComp */, OMX_IN OMX_U32 /* nTunneledPort */, OMX_INOUT OMX_TUNNELSETUPTYPE* /* pTunnelSetup */) = 0;
   virtual void ComponentDeInit() = 0;
+  virtual OMX_ERRORTYPE GetConfig(OMX_IN OMX_INDEXTYPE /* index */, OMX_INOUT OMX_PTR /* config */) = 0;
 
 protected:
   /* Variables */

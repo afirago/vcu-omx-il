@@ -411,6 +411,56 @@ OMX_U32 inline ProcessEncode::ComputeLatency()
   return std::ceil(time);
 }
 
+OMX_ERRORTYPE ProcessEncode::GetConfig(OMX_IN OMX_INDEXTYPE index, OMX_INOUT OMX_PTR config)
+{
+  try
+  {
+    if(!config)
+      return OMX_ErrorBadParameter;
+
+    auto eRet = OMX_ErrorNone;
+    switch(index)
+    {
+      case OMX_IndexConfigCommonOutputCrop:
+      {
+        OMX_CONFIG_RECTTYPE *pRect = (OMX_CONFIG_RECTTYPE *)config;
+        OMX_CONFIG_RECTTYPE mVideoRect;    //* for display crop
+
+        auto& videoDef = outPort.getVideoDefinition();
+        mVideoRect.nLeft = 0;
+        mVideoRect.nTop = 0;
+        mVideoRect.nHeight = videoDef.nFrameHeight;
+        mVideoRect.nWidth = videoDef.nFrameWidth;
+
+        LOGI("get display crop: top[%d],left[%d],width[%d],height[%d]",
+          (int)mVideoRect.nTop,(int)mVideoRect.nLeft,
+          (int)mVideoRect.nWidth,(int)mVideoRect.nHeight);
+
+        if(mVideoRect.nHeight != 0)
+        {
+          memcpy(pRect, &mVideoRect, sizeof(OMX_CONFIG_RECTTYPE));
+        }
+        else
+        {
+          LOGW("the crop is invalid!");
+          eRet = OMX_ErrorUnsupportedIndex;
+        }
+        break;
+      }
+      default:
+      {
+        LOGI("%s: unknown param %d", __func__, index);
+        eRet = OMX_ErrorUnsupportedIndex;
+      }
+    }
+    return eRet;
+  }
+  catch(OMX_ERRORTYPE e)
+  {
+    return e;
+  }
+}
+
 OMX_ERRORTYPE ProcessEncode::GetParameter(OMX_IN OMX_INDEXTYPE nParamIndex, OMX_INOUT OMX_PTR pParam)
 {
   try
