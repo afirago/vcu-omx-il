@@ -63,6 +63,7 @@ static const omx_comp_type* getComp(char* cComponentName)
   return nullptr;
 }
 
+#ifndef ANDROID
 OMX_ERRORTYPE OMX_APIENTRY OMX_Init(void)
 {
   char path[OMX_MAX_STRINGNAME_SIZE] =
@@ -114,6 +115,33 @@ OMX_ERRORTYPE OMX_APIENTRY OMX_Init(void)
 
   return OMX_ErrorNone;
 }
+#else
+OMX_ERRORTYPE OMX_APIENTRY OMX_Init(void)
+{
+  auto uNumLibraryLoad = 0;
+
+  for(unsigned int i = 0; i < NB_OF_COMP; i++)
+  {
+    char cCodecName[OMX_MAX_STRINGNAME_SIZE] =
+    {
+      0
+    };
+    strncat(cCodecName, AL_COMP_LIST[i].pSoLibName, strlen(AL_COMP_LIST[i].pSoLibName));
+
+    AL_COMP_LIST[i].pLibHandle = dlopen(cCodecName, RTLD_LAZY);
+
+    if(!AL_COMP_LIST[i].pLibHandle)
+      ALOGE("Error loading OMX component: %s", dlerror());
+    else
+      uNumLibraryLoad++;
+  }
+
+  if(uNumLibraryLoad == 0)
+    return OMX_ErrorUndefined;
+
+  return OMX_ErrorNone;
+}
+#endif
 
 OMX_ERRORTYPE OMX_APIENTRY OMX_Deinit(void)
 {
@@ -123,7 +151,11 @@ OMX_ERRORTYPE OMX_APIENTRY OMX_Deinit(void)
       continue;
 
     if(dlclose(AL_COMP_LIST[i].pLibHandle))
+#ifndef ANDROID
       cerr << dlerror() << endl;
+#else
+      ALOGE("Error closing OMX component: %s", dlerror());
+#endif
   }
 
   return OMX_ErrorNone;
@@ -151,7 +183,11 @@ static OMX_HANDLETYPE CreateComponent(const omx_comp_type* pComponent, char cons
 
   if(pErr)
   {
+#ifndef ANDROID
     cerr << pErr << endl;
+#else
+    ALOGE("Error creating OMX component: %s", dlerror());
+#endif
     return NULL;
   }
 
