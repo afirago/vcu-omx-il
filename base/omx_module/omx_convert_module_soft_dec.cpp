@@ -62,6 +62,7 @@ AL_EDecUnit ConvertToSoftDecodeUnit(DecodeUnitType const& unit)
   }
 
   assert(0);
+  return AL_AU_UNIT;
 }
 
 DecodedPictureBufferType ConvertToModuleDecodedPictureBuffer(AL_EDpbMode const& mode)
