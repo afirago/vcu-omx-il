@@ -39,6 +39,11 @@
 
 #include <OMX_Types.h>
 #include <OMX_Core.h>
+
+#ifdef ANDROID
+#include <OMX_CoreAlg.h>
+#endif
+
 #include <string.h>
 
 enum AL_ComponentMethods
@@ -145,8 +150,16 @@ public:
   inline
   void CheckHeaderVersion(OMX_VERSIONTYPE const version)
   {
+    /*
+      FIXME:
+      nVersion set by Android doesn't match with one set by VCU OMX IL.
+      Skip version checking for now.
+    */
+#ifndef ANDROID
     if(version.nVersion != OMX_VERSION)
       throw OMX_ErrorVersionMismatch;
+#else
+    (void)(version);
+#endif
   };
 };
-
