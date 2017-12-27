@@ -35,6 +35,7 @@
 *
 ******************************************************************************/
 
+#include <OMX_VideoAlg.h>
 #include "omx_convert_omx_to_module_avc.h"
 
 static inline AVCProfileType ConvertToModuleAVCProfile(OMX_VIDEO_AVCPROFILETYPE const& profile)
@@ -73,10 +74,8 @@ static inline int ConvertToModuleAVCLevel(OMX_VIDEO_AVCLEVELTYPE const& level)
   case OMX_VIDEO_AVCLevel42: return 42;
   case OMX_VIDEO_AVCLevel5: return 50;
   case OMX_VIDEO_AVCLevel51: return 51;
+  case OMX_VIDEO_AVCLevel52: return 52;
   default:
-
-    if(level == static_cast<OMX_VIDEO_AVCLEVELTYPE>(OMX_ALG_VIDEO_AVCLevel52))
-      return 52;
 
     if(level == static_cast<OMX_VIDEO_AVCLEVELTYPE>(OMX_ALG_VIDEO_AVCLevel60))
       return 60;

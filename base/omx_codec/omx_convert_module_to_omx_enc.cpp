@@ -35,6 +35,7 @@
 *
 ******************************************************************************/
 
+#include <OMX_VideoAlg.h>
 #include "omx_convert_module_to_omx_enc.h"
 #include <assert.h>
 

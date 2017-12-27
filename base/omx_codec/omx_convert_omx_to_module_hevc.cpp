@@ -35,6 +35,7 @@
 *
 ******************************************************************************/
 
+#include <OMX_VideoAlg.h>
 #include "omx_convert_omx_to_module_hevc.h"
 
 static inline HEVCProfileType ConvertToModuleHEVCMainProfile(OMX_ALG_VIDEO_HEVCPROFILETYPE const& profile)

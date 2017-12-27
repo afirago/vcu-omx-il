@@ -42,6 +42,7 @@
 #include "omx_convert_omx_to_module_enc.h"
 
 #include <OMX_VideoExt.h>
+#include <OMX_VideoAlg.h>
 #include <OMX_ComponentAlg.h>
 #include <cmath>
 

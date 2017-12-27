@@ -37,6 +37,7 @@
 
 #pragma once
 
+#include <OMX_Video.h>
 #include <OMX_VideoExt.h>
 #include "base/omx_mediatype/omx_mediatype_interface_structs.h"
 

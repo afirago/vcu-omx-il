@@ -35,6 +35,7 @@
 *
 ******************************************************************************/
 
+#include <OMX_Allegro.h>
 #include "omx_convert_omx_to_module_dec.h"
 
 DecodedPictureBufferType ConvertToModuleDecodedPictureBuffer(OMX_ALG_EDpbMode const& mode)

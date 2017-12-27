@@ -35,6 +35,8 @@
 *
 ******************************************************************************/
 
+#include <OMX_Video.h>
+#include <OMX_VideoAlg.h>
 #include "omx_convert_module_to_omx_enc_hevc.h"
 
 OMX_ALG_VIDEO_HEVCLOOPFILTERTYPE ConvertToOMXHEVCLoopFilter(LoopFilterType const& loopFilter)

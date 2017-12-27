@@ -35,6 +35,7 @@
 *
 ******************************************************************************/
 
+#include <OMX_VideoAlg.h>
 #include "omx_convert_module_to_omx.h"
 #include <stdexcept>
 #include <cmath>
@@ -83,8 +84,8 @@ OMX_VIDEO_CODINGTYPE ConvertToOMXCompression(CompressionType const& compression)
   case COMPRESSION_UNUSED: return OMX_VIDEO_CodingUnused;
   case COMPRESSION_MAX: return OMX_VIDEO_CodingMax;
   case COMPRESSION_AVC: return OMX_VIDEO_CodingAVC;
-  case COMPRESSION_VP9: return static_cast<OMX_VIDEO_CODINGTYPE>(OMX_ALG_VIDEO_CodingVP9);
-  case COMPRESSION_HEVC: return static_cast<OMX_VIDEO_CODINGTYPE>(OMX_ALG_VIDEO_CodingHEVC);
+  case COMPRESSION_VP9: return OMX_VIDEO_CodingVP9;
+  case COMPRESSION_HEVC: return OMX_VIDEO_CodingHEVC;
   default:
     throw std::invalid_argument("compression");
   }

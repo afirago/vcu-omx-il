@@ -35,6 +35,7 @@
 *
 ******************************************************************************/
 
+#include <OMX_VideoAlg.h>
 #include "omx_convert_omx_to_module_enc.h"
 
 int ConvertToModuleBFrames(OMX_U32 const& bFrames, OMX_U32 const& pFrames)

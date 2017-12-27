@@ -37,7 +37,9 @@
 
 #pragma once
 
+#include <OMX_Video.h>
 #include <OMX_VideoExt.h>
+#include <OMX_Allegro.h>
 #include "base/omx_mediatype/omx_mediatype_enc_enums.h"
 #include "base/omx_module/omx_module_enc_enums.h"
 #include "base/omx_module/omx_module_enc_structs.h"

@@ -35,6 +35,7 @@
 *
 ******************************************************************************/
 
+#include <OMX_Video.h>
 #include "omx_convert_module_to_omx_enc_avc.h"
 
 OMX_VIDEO_AVCLOOPFILTERTYPE ConvertToOMXAVCLoopFilter(LoopFilterType const& loopFilter)

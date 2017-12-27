@@ -37,7 +37,7 @@
 
 #include "omx_convert_omx_to_module.h"
 
-#include <OMX_VideoExt.h>
+#include <OMX_VideoAlg.h>
 #include <stdexcept>
 #include <cmath>
 
@@ -54,8 +54,8 @@ CompressionType ConvertToModuleCompression(OMX_VIDEO_CODINGTYPE const& coding)
   {
   case OMX_VIDEO_CodingUnused: return COMPRESSION_UNUSED;
   case OMX_VIDEO_CodingAVC: return COMPRESSION_AVC;
-  case OMX_ALG_VIDEO_CodingHEVC: return COMPRESSION_HEVC;
-  case OMX_ALG_VIDEO_CodingVP9: return COMPRESSION_VP9;
+  case OMX_VIDEO_CodingHEVC: return COMPRESSION_HEVC;
+  case OMX_VIDEO_CodingVP9: return COMPRESSION_VP9;
   case OMX_VIDEO_CodingMax: return COMPRESSION_MAX;
   default:
     throw std::invalid_argument("coding");
