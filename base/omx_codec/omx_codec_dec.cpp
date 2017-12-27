@@ -397,11 +397,17 @@ OMX_ERRORTYPE DecCodec::GetParameter(OMX_IN OMX_INDEXTYPE index, OMX_INOUT OMX_P
   OMX_CATCH_PARAMETER();
 }
 
-static bool SetFormats(OMX_COLOR_FORMATTYPE const& color, DecModule& module)
+static bool SetFormats(OMX_COLOR_FORMATTYPE const& color, Port const& port, DecModule& module)
 {
   auto moduleFormats = module.GetFormats();
-  moduleFormats.input.color = moduleFormats.output.color = ConvertToModuleColor(color);
-  moduleFormats.input.bitdepth = moduleFormats.output.bitdepth = ConvertToModuleBitdepth(color);
+
+  if (IsInputPort(port.index)) {
+    moduleFormats.input.color = ConvertToModuleColor(color);
+    moduleFormats.input.bitdepth = ConvertToModuleBitdepth(color);
+  } else {
+    moduleFormats.output.color = ConvertToModuleColor(color);
+    moduleFormats.output.bitdepth = ConvertToModuleBitdepth(color);
+  }
   return module.SetFormats(moduleFormats);
 }
 
@@ -471,7 +477,7 @@ static bool SetPortDefinition(OMX_PARAM_PORTDEFINITIONTYPE const& settings, Port
     return false;
   }
 
-  if(!SetFormats(video.eColorFormat, module))
+  if(!SetFormats(video.eColorFormat, port, module))
   {
     SetPortDefinition(rollback, port, module);
     return false;
@@ -490,7 +496,7 @@ static bool SetVideoPortFormat(OMX_VIDEO_PARAM_PORTFORMATTYPE const& format, Por
     return false;
   }
 
-  if(!SetFormats(format.eColorFormat, module))
+  if(!SetFormats(format.eColorFormat, port, module))
   {
     SetVideoPortFormat(rollback, port, module);
     return false;

@@ -131,7 +131,8 @@ Formats DecModule::GetFormats() const
   outFormat.compression = COMPRESSION_UNUSED;
 
   auto const streamSettings = media->settings.tStream;
-  inFormat.color = outFormat.color = ConvertToModuleColor(streamSettings.eChroma);
+  inFormat.color = COLOR_UNUSED;
+  outFormat.color = ConvertToModuleColor(streamSettings.eChroma);
   inFormat.bitdepth = outFormat.bitdepth = streamSettings.iBitDepth;
 
   return formats;
@@ -254,15 +255,14 @@ bool DecModule::SetClocks(Clocks const& clocks)
 
 bool DecModule::SetFormats(Formats const& formats)
 {
-  if(formats.input.bitdepth != formats.output.bitdepth)
-    return false;
+  // if(formats.input.bitdepth != formats.output.bitdepth)
+  //   return false;
 
-  if(formats.input.color != formats.output.color)
-    return false;
-
+  // if(formats.input.color != formats.output.color)
+  //   return false;
   auto& streamSettings = media->settings.tStream;
-  streamSettings.iBitDepth = formats.input.bitdepth;
-  streamSettings.eChroma = ConvertToSoftChroma(formats.input.color);
+  streamSettings.iBitDepth = formats.output.bitdepth;
+  streamSettings.eChroma = ConvertToSoftChroma(formats.output.color);
   return true;
 }
 
