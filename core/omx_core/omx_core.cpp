@@ -289,23 +289,64 @@ OMX_ERRORTYPE OMX_GetComponentsOfRole(OMX_IN OMX_STRING role, OMX_INOUT OMX_U32*
 
 OMX_ERRORTYPE OMX_GetRolesOfComponent(OMX_IN OMX_STRING compName, OMX_INOUT OMX_U32* pNumRoles, OMX_OUT OMX_U8** roles)
 {
+  OMX_ERRORTYPE eRet = OMX_ErrorNone;
+  unsigned i,j,numofroles = 0;
   auto pComponent = getComp(compName);
 
   if(!pComponent)
     return OMX_ErrorComponentNotFound;
 
-  if(!roles && !pNumRoles)
-    return OMX_ErrorBadParameter;
+  if (roles == NULL)
+  {
+      if (pNumRoles == NULL)
+      {
+         eRet = OMX_ErrorBadParameter;
+      }
+      else
+      {
+         *pNumRoles = 0;
+         for(i = 0; i < NB_OF_COMP; i++)
+         {
+           if(!strcmp(compName, AL_COMP_LIST[i].name))
+           {
+             for(j = 0; (j < OMX_MAX_COMP_ROLES) && AL_COMP_LIST[i].roles[j];j++)
+             {
+                (*pNumRoles)++;
+             }
+             break;
+           }
+         }
 
-  if(!roles && pNumRoles)
-    *pNumRoles = pComponent->nRoles;
+      }
+      return eRet;
+  }
+
+  if (pNumRoles)
+  {
+    if (*pNumRoles == 0)
+    {
+      return OMX_ErrorBadParameter;
+    }
+
+    unsigned numofroles = *pNumRoles;
+    *pNumRoles = 0;
+
+    for(j = 0; (j < OMX_MAX_COMP_ROLES);j++)
+    {
+      if(roles && roles[*pNumRoles])
+      {
+        strncpy((char*)roles[*pNumRoles], (char*)pComponent->roles[j], OMX_MAX_STRINGNAME_SIZE);
+      }
+      (*pNumRoles)++;
+      if (numofroles == *pNumRoles)
+      {
+          break;
+      }
+    }
+  }
   else
   {
-    if(!pNumRoles || *pNumRoles == 0)
-      return OMX_ErrorBadParameter;
-
-    for(unsigned int i = 0; i < *pNumRoles; i++)
-      strncpy((char*)roles[i], (char*)pComponent->roles[i], OMX_MAX_STRINGNAME_SIZE);
+    return OMX_ErrorBadParameter;
   }
 
   return OMX_ErrorNone;
