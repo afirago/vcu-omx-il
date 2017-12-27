@@ -41,6 +41,7 @@
 #include "base/omx_utils/omx_log.h"
 #include <assert.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include <OMX_VideoExt.h>
 #include "omx_convert_module_to_omx.h"
