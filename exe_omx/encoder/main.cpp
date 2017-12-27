@@ -52,7 +52,7 @@
 #include <atomic>
 #include <unistd.h>
 
-#if __ANDROID_API__
+#if 0
 #define LOG_NDEBUG 0
 #define LOG_TAG "AL_OMX_MAIN_EXE"
 #include <android/log.h>
