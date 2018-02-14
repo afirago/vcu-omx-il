@@ -57,11 +57,19 @@ void DecMediatypeAVC::Reset()
   settings.eFBStorageMode = AL_FB_RASTER;
   settings.bIsAvc = true;
 
+#if ANDROID
+  settings.tStream.tDim = { 7680, 4320 };
+  settings.tStream.eChroma = CHROMA_4_2_0;
+  settings.tStream.iBitDepth = 8;
+  settings.tStream.iLevel = 51;
+  settings.tStream.iProfileIdc = AVC_PROFILE_HIGH422;
+#else
   settings.tStream.tDim = { 176, 144 };
   settings.tStream.eChroma = CHROMA_4_2_0;
   settings.tStream.iBitDepth = 8;
   settings.tStream.iLevel = 10;
   settings.tStream.iProfileIdc = AL_PROFILE_AVC_BASELINE;
+#endif
 }
 
 CompressionType DecMediatypeAVC::Compression() const
