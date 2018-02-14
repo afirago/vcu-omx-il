@@ -953,6 +953,9 @@ void Codec::TreatSetStateCommand(Task* task)
     {
       auto outputPort = GetPort(1);
       bool shouldPrealloc = (!outputPort->isTransientToDisable && outputPort->enable);
+#if ANDROID
+      shouldPrealloc = false;
+#endif
       module->Run(shouldPrealloc);
     }
 
