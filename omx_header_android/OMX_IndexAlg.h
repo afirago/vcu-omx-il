@@ -78,6 +78,11 @@ typedef enum OMX_ALG_INDEXTYPE
   OMX_ALG_IndexParamVideoMaxBitrate,                  /**< reference: OMX_ALG_VIDEO_PARAM_MAX_BITRATE */
   OMX_ALG_IndexParamVideoFillerData,                  /**< reference: OMX_ALG_VIDEO_PARAM_FILLER_DATA */
 
+  /* Extensions for NativeWindow configurations */
+  OMX_ALG_IndexExtEnableNativeBuffer,                 /**< reference: EnableNativeBuffer */
+  OMX_ALG_IndexExtGetNativeBufferUsage,               /**< reference: GetNativeBufferUsage */
+  OMX_ALG_IndexExtUseNativeBuffer,                    /**< reference: UseNativeBuffer */
+
   OMX_ALG_IndexMax = 0x7FFFFFFF
 } OMX_ALG_INDEXTYPE;
 

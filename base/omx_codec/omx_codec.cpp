@@ -71,7 +71,7 @@ void Codec::ReturnEmptiedBuffer(uint8_t* emptied)
   map.Remove(emptied);
 
   ClearPropagatedData(header);
-
+  LOGI("~~~%s:%d", __func__, __LINE__);
   if(callbacks.EmptyBufferDone)
     callbacks.EmptyBufferDone(component, app, header);
 }

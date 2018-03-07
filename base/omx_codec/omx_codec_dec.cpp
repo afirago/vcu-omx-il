@@ -49,6 +49,13 @@
 #include "base/omx_utils/omx_log.h"
 #include "base/omx_utils/omx_translate.h"
 
+#ifdef ANDROID
+#include <HardwareAPI.h>
+#include <hardware/gralloc.h>
+#include <gralloc_priv.h>
+#include <sys/mman.h>
+#endif
+
 #define OMX_TRY() \
   try \
   { \
@@ -98,15 +105,18 @@ void DecCodec::EmptyThisBufferCallBack(uint8_t* emptied, int offset, int size)
     assert(0);
   (void)offset;
   (void)size;
-
+  
   auto header = map.Get(emptied);
   assert(header);
   map.Remove(emptied);
 
   ClearPropagatedData(header);
 
-  if(callbacks.EmptyBufferDone)
+  LOGI("~~~%s:%d", __func__, __LINE__);
+  if(callbacks.EmptyBufferDone) {
+    LOGI("~~~%s:%d", __func__, __LINE__);
     callbacks.EmptyBufferDone(component, app, header);
+  }
 }
 
 void DecCodec::AssociateCallBack(uint8_t* empty, uint8_t* fill)
@@ -143,7 +153,7 @@ void DecCodec::FillThisBufferCallBack(uint8_t* filled, int offset, int size)
 {
   if(!filled)
     assert(0);
-
+  LOGI("~~~%s:%d", __func__, __LINE__);
   auto header = map.Get(filled);
   assert(header);
   map.Remove(filled);
@@ -154,8 +164,10 @@ void DecCodec::FillThisBufferCallBack(uint8_t* filled, int offset, int size)
   if(offset == 0 && size == 0)
     header->nFlags = OMX_BUFFERFLAG_EOS;
 
-  if(callbacks.FillBufferDone)
+  if(callbacks.FillBufferDone){
+    LOGI("~~~%s:%d", __func__, __LINE__);
     callbacks.FillBufferDone(component, app, header);
+  }
 }
 
 void DecCodec::EventCallBack(CallbackEventType type, void* data)
@@ -170,9 +182,10 @@ void DecCodec::EventCallBack(CallbackEventType type, void* data)
   {
     LOGI("%s", ToStringCallbackEvent.at(type));
 
-    auto port = GetPort(1);
+    //auto port = GetPort(1);
 
-    if(callbacks.EventHandler && (port->isTransientToEnable || !port->enable))
+    if(callbacks.EventHandler) 
+    // && (port->isTransientToEnable || !port->enable))
       callbacks.EventHandler(component, app, OMX_EventPortSettingsChanged, 1, 0, nullptr);
     break;
   }
@@ -293,6 +306,40 @@ OMX_ALG_VIDEO_PARAM_SUBFRAME ConstructVideoSubframe(Port const& port, DecModule 
   return subframe;
 }
 
+OMX_ERRORTYPE DecCodec::GetConfig(OMX_IN OMX_INDEXTYPE index, OMX_INOUT OMX_PTR config)
+{
+  OMX_TRY();
+  OMXChecker::CheckNotNull(config);
+  OMXChecker::CheckHeaderVersion(GetVersion(config));
+  OMXChecker::CheckStateOperation(AL_GetConfig, state);
+
+  switch(static_cast<OMX_U32>(index))
+  {
+    case OMX_IndexConfigCommonOutputCrop:
+    {
+      OMX_CONFIG_RECTTYPE * out_crop = (OMX_CONFIG_RECTTYPE*)(config);
+
+      auto port = GetPort(out_crop->nPortIndex);
+
+      if (IsInputPort(port->index)){
+        LOGE("OMX_IndexConfigCommonOutputCrop called on input port. Not supported");
+        return OMX_ErrorBadParameter;
+      }
+      auto const moduleResolution = ToDecModule(*module).GetResolutions().output;
+      out_crop->nLeft = 0;
+      out_crop->nTop = 0;
+      out_crop->nWidth = moduleResolution.width;
+      out_crop->nHeight = moduleResolution.height;
+      return OMX_ErrorNone;
+    }
+    default:
+      LOGE("%s is unsupported", ToStringIndex.at(index));
+      return OMX_ErrorUnsupportedIndex;
+  }
+  return OMX_ErrorUnsupportedIndex;
+  OMX_CATCH(); 
+}
+
 OMX_ERRORTYPE DecCodec::GetParameter(OMX_IN OMX_INDEXTYPE index, OMX_INOUT OMX_PTR param)
 {
   OMX_TRY();
@@ -322,7 +369,16 @@ OMX_ERRORTYPE DecCodec::GetParameter(OMX_IN OMX_INDEXTYPE index, OMX_INOUT OMX_P
   case OMX_IndexParamPortDefinition:
   {
     auto port = getCurrentPort(param);
-    *(OMX_PARAM_PORTDEFINITIONTYPE*)param = ConstructPortDefinition(*port, ToDecModule(*module));
+    auto p = (OMX_PARAM_PORTDEFINITIONTYPE*)param;
+    *p = ConstructPortDefinition(*port, ToDecModule(*module));
+#ifdef ANDROID
+    auto const buf_mode = ConstructPortBufferMode(*port, ToDecModule(*module));
+    if (buf_mode.eMode == OMX_ALG_BUF_DMA)
+    {
+      if (p->format.video.eColorFormat == OMX_COLOR_FormatYUV420SemiPlanar)
+        p->format.video.eColorFormat = (OMX_COLOR_FORMATTYPE)HAL_PIXEL_FORMAT_YCrCb_420_SP;
+    }
+#endif
     return OMX_ErrorNone;
   }
   case OMX_IndexParamCompBufferSupplier:
@@ -340,6 +396,14 @@ OMX_ERRORTYPE DecCodec::GetParameter(OMX_IN OMX_INDEXTYPE index, OMX_INOUT OMX_P
       return OMX_ErrorNoMore;
 
     *p = ConstructVideoPortFormat(*port, ToDecModule(*module));
+#ifdef ANDROID
+    auto const buf_mode = ConstructPortBufferMode(*port, ToDecModule(*module));
+    if (buf_mode.eMode == OMX_ALG_BUF_DMA)
+    {
+      if (p->eColorFormat == OMX_COLOR_FormatYUV420SemiPlanar)
+        p->eColorFormat = (OMX_COLOR_FORMATTYPE)HAL_PIXEL_FORMAT_YCrCb_420_SP;
+    } 
+#endif
     return OMX_ErrorNone;
   }
   case OMX_IndexParamVideoProfileLevelCurrent:
@@ -387,6 +451,20 @@ OMX_ERRORTYPE DecCodec::GetParameter(OMX_IN OMX_INDEXTYPE index, OMX_INOUT OMX_P
     *(OMX_ALG_VIDEO_PARAM_INTERNAL_ENTROPY_BUFFERS*)param = ConstructVideoInternalEntropyBuffers(*port, ToDecModule(*module));
     return OMX_ErrorNone;
   }
+#ifdef ANDROID
+  case OMX_ALG_IndexExtGetNativeBufferUsage:
+  {
+    auto const port = getCurrentPort(param);
+    android::GetAndroidNativeBufferUsageParams* usg_param = (android::GetAndroidNativeBufferUsageParams*)param;
+    if (IsInputPort(port->index))
+    {
+      LOGE("OMX_ALG_IndexExtGetNativeBufferUsage called on input port. Not supported");
+      return OMX_ErrorBadParameter;
+    }
+    usg_param->nUsage = GRALLOC_USAGE_HW_RENDER;
+    return OMX_ErrorNone;
+  }
+#endif
   default:
     LOGE("%s is unsupported", ToStringIndex.at(index));
     return OMX_ErrorUnsupportedIndex;
@@ -598,10 +676,19 @@ OMX_ERRORTYPE DecCodec::SetParameter(OMX_IN OMX_INDEXTYPE index, OMX_IN OMX_PTR 
     if(!port->isTransientToDisable && port->enable)
       OMXChecker::CheckStateOperation(AL_SetParameter, state);
 
-    auto const settings = static_cast<OMX_PARAM_PORTDEFINITIONTYPE*>(param);
+    auto settings = static_cast<OMX_PARAM_PORTDEFINITIONTYPE*>(param);
 
     if(!SetPortExpectedBuffer(*settings, const_cast<Port &>(*port), ToDecModule(*module)))
       throw OMX_ErrorBadParameter;
+
+#if ANDROID
+    auto const buf_mode = ConstructPortBufferMode(*port, ToDecModule(*module));
+    if (buf_mode.eMode == OMX_ALG_BUF_DMA)
+    {
+      if (settings->format.video.eColorFormat == (OMX_COLOR_FORMATTYPE)HAL_PIXEL_FORMAT_YCrCb_420_SP)
+        settings->format.video.eColorFormat = OMX_COLOR_FormatYUV420SemiPlanar;
+    }
+#endif
 
     if(!SetPortDefinition(*settings, *port, ToDecModule(*module)))
       throw OMX_ErrorBadParameter;
@@ -621,7 +708,16 @@ OMX_ERRORTYPE DecCodec::SetParameter(OMX_IN OMX_INDEXTYPE index, OMX_IN OMX_PTR 
 
     if(!port->isTransientToDisable && port->enable)
       OMXChecker::CheckStateOperation(AL_SetParameter, state);
-    auto const format = static_cast<OMX_VIDEO_PARAM_PORTFORMATTYPE*>(param);
+    auto format = static_cast<OMX_VIDEO_PARAM_PORTFORMATTYPE*>(param);
+
+#if ANDROID
+    auto const buf_mode = ConstructPortBufferMode(*port, ToDecModule(*module));
+    if (buf_mode.eMode == OMX_ALG_BUF_DMA)
+    {
+      if (format->eColorFormat == (OMX_COLOR_FORMATTYPE)HAL_PIXEL_FORMAT_YCrCb_420_SP)
+        format->eColorFormat = OMX_COLOR_FormatYUV420SemiPlanar;
+    }
+#endif
 
     if(!SetVideoPortFormat(*format, *port, ToDecModule(*module)))
       throw OMX_ErrorBadParameter;
@@ -686,6 +782,62 @@ OMX_ERRORTYPE DecCodec::SetParameter(OMX_IN OMX_INDEXTYPE index, OMX_IN OMX_PTR 
       throw OMX_ErrorBadParameter;
     return OMX_ErrorNone;
   }
+#ifdef ANDROID
+  case OMX_ALG_IndexExtEnableNativeBuffer:
+  {
+    auto const port = getCurrentPort(param);
+    LOGI("~~~ %s : %d", __func__, __LINE__);
+    if(!port->isTransientToDisable && port->enable)
+      OMXChecker::CheckStateOperation(AL_SetParameter, state);
+    LOGI("~~~ %s : %d", __func__, __LINE__);
+    auto const android_buf_mode = (android::EnableAndroidNativeBuffersParams*)param;
+    OMX_ALG_PORT_PARAM_BUFFER_MODE alg_buf_mode;
+    OMXChecker::SetHeaderVersion(alg_buf_mode);
+    alg_buf_mode.nPortIndex = port->index;
+    LOGI("~~~ %s : %d", __func__, __LINE__);
+    if (android_buf_mode->enable == OMX_TRUE) {
+      alg_buf_mode.eMode = OMX_ALG_BUF_DMA;
+      LOGI("~~~ setting dma buf mode");
+    }
+    else
+      alg_buf_mode.eMode = OMX_ALG_BUF_NORMAL;
+
+    LOGI("~~~ %s : %d", __func__, __LINE__);
+    if(!SetPortBufferMode(alg_buf_mode, *port, ToDecModule(*module)))
+      throw OMX_ErrorBadParameter;
+    LOGI("~~~ %s : %d", __func__, __LINE__);
+    return OMX_ErrorNone;
+  }
+
+  case OMX_ALG_IndexExtUseNativeBuffer:
+  {
+    auto const port = getCurrentPort(param);
+    if(IsInputPort(port->index))
+      throw OMX_ErrorBadParameter;
+
+    auto buf_params = (android::UseAndroidNativeBufferParams *)(param);
+
+    if (buf_params->nativeBuffer == NULL || buf_params->nativeBuffer->handle == NULL)
+      throw OMX_ErrorBadParameter;
+    
+    android::sp<android_native_buffer_t> nBuf = buf_params->nativeBuffer;
+    private_handle_t *handle = (private_handle_t *)nBuf->handle;
+    OMX_U8 *buffer = NULL;
+    LOGI("~~~ %s : %d", __func__, __LINE__);
+    buffer = (OMX_U8*)(uintptr_t)(handle->share_fd);
+#if 0
+    private_handle_t *handle = (private_handle_t *)nBuf->handle;
+    OMX_U8 *buffer = NULL;
+    buffer = (OMX_U8*)mmap(0, handle->size,
+                PROT_READ|PROT_WRITE, MAP_SHARED, handle->share_fd, 0);
+    if(buffer == MAP_FAILED) {
+      LOGE("Failed to mmap Android native buffer");
+      throw OMX_ErrorInsufficientResources;
+    }
+#endif
+    return UseBuffer(buf_params->bufferHeader, buf_params->nPortIndex, buf_params->pAppPrivate, handle->size, buffer);
+  }
+#endif
   default:
     LOGE("%s is unsupported", ToStringIndex.at(index));
     return OMX_ErrorUnsupportedIndex;
@@ -702,6 +854,21 @@ OMX_ERRORTYPE DecCodec::GetExtensionIndex(OMX_IN OMX_STRING name, OMX_OUT OMX_IN
   OMXChecker::CheckNotNull(name);
   OMXChecker::CheckNotNull(index);
   OMXChecker::CheckStateOperation(AL_GetExtensionIndex, state);
+
+  if (!strcmp(name, "OMX.google.android.index.enableAndroidNativeBuffers")) {
+      *index = static_cast<OMX_INDEXTYPE>(OMX_ALG_IndexExtEnableNativeBuffer);
+      return OMX_ErrorNone;
+  }
+
+  if (!strcmp(name, "OMX.google.android.index.getAndroidNativeBufferUsage")) {
+      *index = static_cast<OMX_INDEXTYPE>(OMX_ALG_IndexExtGetNativeBufferUsage);
+      return OMX_ErrorNone;
+  }
+
+  if (!strcmp(name, "OMX.google.android.index.useAndroidNativeBuffer")) {
+      *index = static_cast<OMX_INDEXTYPE>(OMX_ALG_IndexExtUseNativeBuffer);
+      return OMX_ErrorNone;
+  }
   return OMX_ErrorNoMore;
   OMX_CATCH();
 }

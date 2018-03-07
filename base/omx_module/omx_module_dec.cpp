@@ -49,6 +49,7 @@ extern "C"
 #include <lib_common/FourCC.h>
 }
 
+#include "base/omx_utils/omx_log.h"
 #include "omx_convert_module_soft.h"
 #include "omx_convert_module_soft_dec.h"
 
@@ -323,7 +324,7 @@ void DecModule::EndDecoding(AL_TBuffer* decodedFrame)
 void DecModule::Display(AL_TBuffer* frameToDisplay, AL_TInfoDecode* info)
 {
   auto const isRelease = (frameToDisplay && info == nullptr);
-
+LOGI("~~~%s:%d", __func__, __LINE__);
   if(isRelease)
   {
     auto const handleOut = translateOut.Get(frameToDisplay);
@@ -399,7 +400,7 @@ bool DecModule::CreateDecoder(bool shouldPrealloc)
 {
   if(decoder)
   {
-    fprintf(stderr, "Decoder is ALREADY created\n");
+    LOGE( "Decoder is ALREADY created\n");
     assert(0);
   }
 
@@ -412,7 +413,7 @@ bool DecModule::CreateDecoder(bool shouldPrealloc)
 
   if(errorCode != AL_SUCCESS)
   {
-    fprintf(stderr, "Failed to create Decoder: %d\n", errorCode);
+    LOGE( "Failed to create Decoder: %d\n", errorCode);
     return false;
   }
 
@@ -426,7 +427,7 @@ bool DecModule::DestroyDecoder()
 {
   if(!decoder)
   {
-    fprintf(stderr, "Decoder isn't created\n");
+    LOGE( "Decoder isn't created\n");
     return false;
   }
 
@@ -448,7 +449,7 @@ bool DecModule::Create()
 {
   if(decoder)
   {
-    fprintf(stderr, "Decoder should NOT be created\n");
+    LOGE( "Decoder should NOT be created\n");
     assert(0);
     return false;
   }
@@ -461,7 +462,7 @@ void DecModule::Destroy()
 {
   if(decoder)
   {
-    fprintf(stderr, "Decoder should ALREADY be destroyed\n");
+    LOGE( "Decoder should ALREADY be destroyed\n");
     assert(0);
   }
 
@@ -501,7 +502,7 @@ void* DecModule::Allocate(size_t size)
 
   if(!handle)
   {
-    fprintf(stderr, "No more memory\n");
+    LOGE( "No more memory\n");
     return nullptr;
   }
 
@@ -517,7 +518,7 @@ int DecModule::AllocateDMA(int size)
 
   if(!handle)
   {
-    fprintf(stderr, "No more memory\n");
+    LOGE( "No more memory\n");
     return -1;
   }
 
@@ -561,7 +562,7 @@ AL_TBuffer* DecModule::CreateInputBuffer(uint8_t* buffer, int const& size)
 
     if(!dmaHandle)
     {
-      fprintf(stderr, "Failed to import fd : %i\n", fd);
+      LOGE( "Failed to import fd : %i\n", fd);
       return nullptr;
     }
 
@@ -659,7 +660,7 @@ AL_TBuffer* DecModule::CreateOutputBuffer(uint8_t* buffer, int const& size)
 
     if(!dmaHandle)
     {
-      fprintf(stderr, "Failed to import fd : %i\n", fd);
+      LOGE( "Failed to import fd : %i\n", fd);
       ((AL_TMetaData*)sourceMeta)->MetaDestroy((AL_TMetaData*)sourceMeta);
       return nullptr;
     }
@@ -717,7 +718,7 @@ bool DecModule::Fill(uint8_t* buffer, int offset, int size)
     eosHandles.output = output;
     return true;
   }
-
+LOGI("~~~%s:%d", __func__, __LINE__);
   AL_Decoder_PutDisplayPicture(decoder, output);
   return true;
 }
@@ -726,14 +727,14 @@ bool DecModule::Run(bool shouldPrealloc)
 {
   if(decoder)
   {
-    fprintf(stderr, "You can't call Run twice\n");
+    LOGE( "You can't call Run twice\n");
     assert(0);
     return false;
   }
 
   if(!isCreated)
   {
-    fprintf(stderr, "You should call Create before Run\n");
+    LOGE( "You should call Create before Run\n");
     return false;
   }
 
@@ -758,7 +759,7 @@ bool DecModule::Pause()
 
   if(!eosHandles.eosSent)
   {
-    fprintf(stderr, "Passing in Pause without sending eos\n");
+    LOGE( "Passing in Pause without sending eos\n");
     assert(0);
     return false;
   }

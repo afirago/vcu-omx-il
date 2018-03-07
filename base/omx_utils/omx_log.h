@@ -39,7 +39,7 @@
 
 #include <stdio.h>
 #define ENABLE_LOG 0
-#define VERBOSE 0
+#define VERBOSE 1
 
 #ifndef ANDROID
 #define LOG(err, fmt, ...) \

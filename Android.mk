@@ -50,6 +50,9 @@ LOCAL_CPPFLAGS += -fexceptions -std=c++11
 
 LOCAL_C_INCLUDES := \
 	frameworks/native/include/media/openmax \
+	frameworks/native/include/media/hardware \
+	hardware/libhardware/include \
+	device/xilinx/common/gralloc \
 	$(LOCAL_PATH)/omx_header_android
 
 LIB_OMX_CORE_SRC := \
@@ -79,6 +82,9 @@ LOCAL_CPPFLAGS += -fexceptions -std=c++11 -frtti
 
 LOCAL_C_INCLUDES := \
 	frameworks/native/include/media/openmax \
+	frameworks/native/include/media/hardware \
+	hardware/libhardware/include \
+	device/xilinx/common/gralloc \
 	hardware/xilinx/vcu/vcu-ctrl-sw/include \
 	$(LOCAL_PATH)/omx_header_android
 
@@ -132,6 +138,7 @@ LOCAL_CPPFLAGS += -fexceptions -std=c++11 -frtti
 
 LOCAL_C_INCLUDES := \
 	frameworks/native/include/media/openmax \
+	frameworks/native/include/media/hardware \
 	hardware/xilinx/vcu/vcu-ctrl-sw/include \
 	$(LOCAL_PATH)/omx_header_android
 
@@ -189,6 +196,7 @@ LOCAL_CPPFLAGS += -fexceptions -std=c++11
 
 LOCAL_C_INCLUDES := \
 	frameworks/native/include/media/openmax \
+	frameworks/native/include/media/hardware \
 	hardware/xilinx/vcu/vcu-ctrl-sw/include \
 	$(LOCAL_PATH)/omx_header_android
 
@@ -222,6 +230,7 @@ LOCAL_CPPFLAGS += -fexceptions -std=c++11
 LOCAL_C_INCLUDES := \
 	frameworks/native/include/media/openmax \
 	hardware/xilinx/vcu/vcu-ctrl-sw/include \
+	frameworks/native/include/media/hardware \
 	$(LOCAL_PATH)/omx_header_android
 
 EXE_TEST_ENCODE_OMX_SRC:= \

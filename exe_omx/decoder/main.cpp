@@ -324,7 +324,7 @@ static OMX_ERRORTYPE allocBuffers(OMX_U32 nPortIndex, bool use_dmabuf, Applicati
   if(isSupplier(nPortIndex, app))
   {
     // Allocate buffer
-    LOGV("Component port (%u) is supplier", nPortIndex);
+    LOGI("Component port (%u) is supplier", nPortIndex);
 
     for(decltype(minBuf)nbBuf = 0; nbBuf < minBuf; nbBuf++)
     {
@@ -347,7 +347,7 @@ static OMX_ERRORTYPE allocBuffers(OMX_U32 nPortIndex, bool use_dmabuf, Applicati
   else
   {
     // Use Buffer
-    LOGV("Component port (%u) is not supplier", nPortIndex);
+    LOGI("Component port (%u) is not supplier", nPortIndex);
 
     for(decltype(minBuf)nbBuf = 0; nbBuf < minBuf; nbBuf++)
     {
@@ -396,7 +396,7 @@ static OMX_ERRORTYPE allocBuffers(OMX_U32 nPortIndex, bool use_dmabuf, Applicati
 
 static OMX_ERRORTYPE freeBuffers(OMX_U32 nPortIndex, Application& app)
 {
-  LOGV("Port (%u)", nPortIndex);
+  LOGI("Port (%u)", nPortIndex);
 
   if(isSupplier(nPortIndex, app))
   {
@@ -526,7 +526,7 @@ static OMX_ERRORTYPE setPortParameters(Application& app)
 OMX_ERRORTYPE onInputBufferAvailable(OMX_HANDLETYPE /*hComponent*/, OMX_PTR pAppData, OMX_BUFFERHEADERTYPE* pBuffer)
 {
   auto app = static_cast<Application*>(pAppData);
-  LOGV("InputBufferAvailable");
+  LOGI("InputBufferAvailable");
   assert(pBuffer->nFilledLen == 0);
   app->inputBuffers.push(pBuffer);
   return OMX_ErrorNone;
@@ -851,7 +851,7 @@ OMX_ERRORTYPE safeMain(int argc, char** argv)
 
     if(eof)
     {
-      LOGV("End of file");
+      LOGI("End of file");
       auto emptyBuffer = app.inputBuffers.pop();
       emptyBuffer->nFilledLen = 0;
       inputBuffer->nFlags |= OMX_BUFFERFLAG_EOS;
@@ -859,10 +859,10 @@ OMX_ERRORTYPE safeMain(int argc, char** argv)
     }
   }
 
-  LOGV("Waiting for EOS ... ");
+  LOGI("Waiting for EOS ... ");
   app.eofSem.wait();
   cerr.flush();
-  LOGV("EOS received");
+  LOGI("EOS received");
 
   /** state change of all components from executing to idle */
   OMX_CALL(OMX_SendCommand(app.hDecoder, OMX_CommandFlush, 0, nullptr));
