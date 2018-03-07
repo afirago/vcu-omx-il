@@ -281,4 +281,29 @@ LOCAL_MODULE := omx_encoder
 LOCAL_VENDOR_MODULE := true
 include $(BUILD_EXECUTABLE)
 
+##################################
+# libstagefrighthw
+##################################
+
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES := \
+	libstagefrighthw/XilinxOMXPlugin.cpp
+
+LOCAL_CFLAGS := $(PV_CFLAGS_MINUS_VISIBILITY)
+
+LOCAL_C_INCLUDES:= \
+	frameworks/native/include/media/openmax \
+	frameworks/native/include/media/hardware
+
+LOCAL_SHARED_LIBRARIES := \
+	libbinder \
+	libutils \
+	libcutils \
+	libdl \
+	libui                   \
+
+LOCAL_MODULE := libstagefrighthw
+include $(BUILD_SHARED_LIBRARY)
+
 endif #TARGET_USES_XILINX_VCU
