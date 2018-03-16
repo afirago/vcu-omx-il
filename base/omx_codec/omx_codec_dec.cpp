@@ -293,6 +293,40 @@ OMX_ALG_VIDEO_PARAM_SUBFRAME ConstructVideoSubframe(Port const& port, DecModule 
   return subframe;
 }
 
+OMX_ERRORTYPE DecCodec::GetConfig(OMX_IN OMX_INDEXTYPE index, OMX_INOUT OMX_PTR config)
+{
+  OMX_TRY();
+  OMXChecker::CheckNotNull(config);
+  OMXChecker::CheckHeaderVersion(GetVersion(config));
+  OMXChecker::CheckStateOperation(AL_GetConfig, state);
+
+  switch(static_cast<OMX_U32>(index))
+  {
+    case OMX_IndexConfigCommonOutputCrop:
+    {
+      OMX_CONFIG_RECTTYPE * out_crop = (OMX_CONFIG_RECTTYPE*)(config);
+
+      auto port = GetPort(out_crop->nPortIndex);
+
+      if (IsInputPort(port->index)){
+        LOGE("OMX_IndexConfigCommonOutputCrop called on input port. Not supported");
+        return OMX_ErrorBadParameter;
+      }
+      auto const moduleResolution = ToDecModule(*module).GetResolutions().output;
+      out_crop->nLeft = 0;
+      out_crop->nTop = 0;
+      out_crop->nWidth = moduleResolution.width;
+      out_crop->nHeight = moduleResolution.height;
+      return OMX_ErrorNone;
+    }
+    default:
+      LOGE("%s is unsupported", ToStringIndex.at(index));
+      return OMX_ErrorUnsupportedIndex;
+  }
+  return OMX_ErrorUnsupportedIndex;
+  OMX_CATCH();
+}
+
 OMX_ERRORTYPE DecCodec::GetParameter(OMX_IN OMX_INDEXTYPE index, OMX_INOUT OMX_PTR param)
 {
   OMX_TRY();
