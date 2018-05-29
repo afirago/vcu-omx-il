@@ -71,10 +71,12 @@ void initHeader(T& header)
   memset(&header, 0x0, sizeof(T));
   header.nSize = sizeof(header);
 
+#ifndef ANDROID
   header.nVersion.s.nVersionMajor = OMX_VERSION_MAJOR;
   header.nVersion.s.nVersionMinor = OMX_VERSION_MINOR;
   header.nVersion.s.nRevision = OMX_VERSION_REVISION;
   header.nVersion.s.nStep = OMX_VERSION_STEP;
+#endif
 };
 
 inline char const* toStringCompState(OMX_STATETYPE state)
