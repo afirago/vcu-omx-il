@@ -39,6 +39,7 @@
 
 #include <OMX_VideoExt.h>
 #include <OMX_ComponentAlg.h>
+#include <OMX_VideoAlg.h>
 
 #include "base/omx_module/omx_module_enums.h"
 #include "base/omx_module/omx_module_structs.h"

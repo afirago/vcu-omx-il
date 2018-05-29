@@ -39,6 +39,7 @@
 
 #include <OMX_CoreExt.h>
 #include <OMX_IndexExt.h>
+#include <OMX_IndexAlg.h>
 #include <map>
 
 static std::map<OMX_ERRORTYPE, const char*> ToStringOMXError =
