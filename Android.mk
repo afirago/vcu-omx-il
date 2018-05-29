@@ -81,7 +81,8 @@ LOCAL_CPPFLAGS += -fexceptions -std=c++11 -frtti
 
 LOCAL_C_INCLUDES := \
 	frameworks/native/include/media/openmax \
-	hardware/xilinx/vcu/vcu-ctrl-sw/include
+	hardware/xilinx/vcu/vcu-ctrl-sw/include \
+	$(LOCAL_PATH)/omx_header_android
 
 OMX_CODEC_DEC_SRCS := \
 	base/omx_codec/omx_codec_dec.cpp \
@@ -138,7 +139,8 @@ LOCAL_CPPFLAGS += -fexceptions -std=c++11 -frtti
 
 LOCAL_C_INCLUDES := \
 	frameworks/native/include/media/openmax \
-	hardware/xilinx/vcu/vcu-ctrl-sw/include
+	hardware/xilinx/vcu/vcu-ctrl-sw/include \
+	$(LOCAL_PATH)/omx_header_android
 
 OMX_CODEC_ENC_SRCS := \
 	base/omx_codec/omx_codec_enc.cpp \
@@ -197,7 +199,8 @@ LOCAL_CPPFLAGS += -fexceptions -std=c++11
 
 LOCAL_C_INCLUDES := \
 	frameworks/native/include/media/openmax \
-	hardware/xilinx/vcu/vcu-ctrl-sw/include
+	hardware/xilinx/vcu/vcu-ctrl-sw/include \
+	$(LOCAL_PATH)/omx_header_android
 
 EXE_OMX_DECODER_SRCS := \
 	exe_omx/decoder/main.cpp \
@@ -229,7 +232,8 @@ LOCAL_CPPFLAGS += -fexceptions -std=c++11
 
 LOCAL_C_INCLUDES := \
 	frameworks/native/include/media/openmax \
-	hardware/xilinx/vcu/vcu-ctrl-sw/include
+	hardware/xilinx/vcu/vcu-ctrl-sw/include \
+	$(LOCAL_PATH)/omx_header_android
 
 EXE_OMX_ENCODER_SRCS:= \
 	exe_omx/encoder/main.cpp \
