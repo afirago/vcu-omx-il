@@ -857,11 +857,14 @@ Gop DecModule::GetGop() const
 {
   // This will be replaced by omx_settings
   assert(0);
+  Gop tmp;
+  return tmp;
 }
 
 bool DecModule::SetGop(Gop const &)
 {
   // This will be replaced by omx_settings
   assert(0);
+  return false;
 }
 
