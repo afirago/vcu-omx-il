@@ -60,13 +60,21 @@ void DecMediatypeHEVC::Reset()
   settings.eFBStorageMode = AL_FB_RASTER;
   settings.bIsAvc = false;
 
+#ifdef ANDROID
+  auto & stream = settings.tStream;
+  stream.tDim = { 3840, 2176 };
+  stream.eChroma = CHROMA_4_2_0;
+  stream.iBitDepth = 8;
+  stream.iLevel = 51;
+  stream.iProfileIdc = AL_PROFILE_HEVC_MAIN10;
+#else
   auto & stream = settings.tStream;
   stream.tDim = { 176, 144 };
   stream.eChroma = CHROMA_4_2_0;
   stream.iBitDepth = 8;
   stream.iLevel = 10;
   stream.iProfileIdc = AL_PROFILE_HEVC_MAIN;
-
+#endif
 
   stride = RoundUp(AL_Decoder_RoundPitch(stream.tDim.iWidth, stream.iBitDepth, settings.eFBStorageMode), strideAlignment);
   sliceHeight = RoundUp(AL_Decoder_RoundHeight(stream.tDim.iHeight), sliceHeightAlignment);
