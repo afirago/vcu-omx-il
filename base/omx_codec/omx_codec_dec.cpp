@@ -356,11 +356,17 @@ OMX_ERRORTYPE DecCodec::GetParameter(OMX_IN OMX_INDEXTYPE index, OMX_INOUT OMX_P
   case OMX_IndexParamVideoPortFormat:
   {
     auto const port = getCurrentPort(param);
-    (void)port;
     auto p = (OMX_VIDEO_PARAM_PORTFORMATTYPE*)param;
 
     if(!GetVideoPortFormatSupported(*p, ToDecModule(*module)))
       return OMX_ErrorNoMore;
+
+    if (IsInputPort(port->index)){
+      p->eColorFormat = OMX_COLOR_FormatUnused;
+    } else {
+      p->eCompressionFormat = OMX_VIDEO_CodingUnused;
+    }
+
     return OMX_ErrorNone;
   }
   case OMX_IndexParamVideoProfileLevelCurrent:
@@ -491,10 +497,13 @@ static bool SetPortDefinition(OMX_PARAM_PORTDEFINITIONTYPE const& settings, Port
   auto const rollback = ConstructPortDefinition(port, module);
   auto const video = settings.format.video;
 
-  if(!SetFormat(video.eColorFormat, module))
+  if (!IsInputPort(port.index))
   {
-    SetPortDefinition(rollback, port, module);
-    return false;
+    if(!SetFormat(video.eColorFormat, module))
+    {
+      SetPortDefinition(rollback, port, module);
+      return false;
+    }
   }
 
   if(!SetClock(video.xFramerate, module))
@@ -522,10 +531,13 @@ static bool SetVideoPortFormat(OMX_VIDEO_PARAM_PORTFORMATTYPE const& format, Por
     return false;
   }
 
-  if(!SetFormat(format.eColorFormat, module))
+  if (!IsInputPort(port.index))
   {
-    SetVideoPortFormat(rollback, port, module);
-    return false;
+    if(!SetFormat(format.eColorFormat, module))
+    {
+      SetVideoPortFormat(rollback, port, module);
+      return false;
+    }
   }
   return true;
 }
@@ -852,4 +864,3 @@ void DecCodec::TreatEmptyBufferCommand(Task* task)
   auto success = module->Empty(header->pBuffer, header->nOffset, header->nFilledLen, header);
   assert(success);
 }
-
