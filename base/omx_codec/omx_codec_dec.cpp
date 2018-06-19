@@ -864,3 +864,59 @@ void DecCodec::TreatEmptyBufferCommand(Task* task)
   auto success = module->Empty(header->pBuffer, header->nOffset, header->nFilledLen, header);
   assert(success);
 }
+
+OMX_ERRORTYPE DecCodec::GetConfig(OMX_IN OMX_INDEXTYPE index, OMX_INOUT OMX_PTR config)
+{
+  OMX_TRY();
+  OMXChecker::CheckNotNull(config);
+  OMXChecker::CheckHeaderVersion(GetVersion(config));
+  OMXChecker::CheckStateOperation(AL_GetConfig, state);
+
+  switch(static_cast<OMX_U32>(index))
+  {
+    case OMX_IndexConfigVideoBitrate:
+    {
+      auto& bitrate = *(static_cast<OMX_VIDEO_CONFIG_BITRATETYPE*>(config));
+      module->GetDynamic(DYNAMIC_INDEX_BITRATE, &bitrate.nEncodeBitrate);
+      return OMX_ErrorNone;
+    }
+    case OMX_IndexConfigVideoFramerate:
+    {
+      Clock clock;
+      module->GetDynamic(DYNAMIC_INDEX_CLOCK, &clock);
+      auto& framerate = *(static_cast<OMX_CONFIG_FRAMERATETYPE*>(config));
+      framerate.xEncodeFramerate = ConvertToOMXFramerate(clock);
+      return OMX_ErrorNone;
+    }
+    case OMX_ALG_IndexConfigVideoGroupOfPictures:
+    {
+      Gop moduleGop;
+      module->GetDynamic(DYNAMIC_INDEX_GOP, &moduleGop);
+      auto& gop = *(static_cast<OMX_ALG_VIDEO_CONFIG_GROUP_OF_PICTURES*>(config));
+      gop.nBFrames = ConvertToOMXBFrames(moduleGop);
+      gop.nPFrames = ConvertToOMXPFrames(moduleGop);
+      return OMX_ErrorNone;
+    }
+    case OMX_IndexConfigCommonOutputCrop:
+    {
+      OMX_CONFIG_RECTTYPE * out_crop = (OMX_CONFIG_RECTTYPE*)(config);
+
+      auto port = GetPort(out_crop->nPortIndex);
+
+      if (IsInputPort(port->index)){
+        LOGE("OMX_IndexConfigCommonOutputCrop called on input port. Not supported");
+        return OMX_ErrorBadParameter;
+      }
+      auto const Resolution =  ToDecModule(*module).GetResolution();
+      out_crop->nLeft = 0;
+      out_crop->nTop = 0;
+      out_crop->nWidth = Resolution.width;
+      out_crop->nHeight = Resolution.height;
+      return OMX_ErrorNone;
+    }
+    default:
+      return OMX_ErrorUnsupportedIndex;
+  }
+  return OMX_ErrorUnsupportedIndex;
+  OMX_CATCH();
+}
