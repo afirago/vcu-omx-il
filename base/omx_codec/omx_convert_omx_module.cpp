@@ -96,8 +96,13 @@ OMX_VIDEO_CODINGTYPE ConvertToOMXCompression(CompressionType const& compression)
   case COMPRESSION_UNUSED: return OMX_VIDEO_CodingUnused;
   case COMPRESSION_MAX: return OMX_VIDEO_CodingMax;
   case COMPRESSION_AVC: return OMX_VIDEO_CodingAVC;
+#ifdef ANDROID
+  case COMPRESSION_VP9: return OMX_VIDEO_CodingVP9;
+  case COMPRESSION_HEVC: return OMX_VIDEO_CodingHEVC;
+#else
   case COMPRESSION_VP9: return static_cast<OMX_VIDEO_CODINGTYPE>(OMX_ALG_VIDEO_CodingVP9);
   case COMPRESSION_HEVC: return static_cast<OMX_VIDEO_CODINGTYPE>(OMX_ALG_VIDEO_CodingHEVC);
+#endif
   default:
     throw invalid_argument("compression");
   }
@@ -130,8 +135,13 @@ CompressionType ConvertToModuleCompression(OMX_VIDEO_CODINGTYPE const& coding)
   {
   case OMX_VIDEO_CodingUnused: return COMPRESSION_UNUSED;
   case OMX_VIDEO_CodingAVC: return COMPRESSION_AVC;
+#ifdef ANDROID
+  case OMX_VIDEO_CodingVP9: return COMPRESSION_VP9;
+  case OMX_VIDEO_CodingHEVC: return COMPRESSION_HEVC;
+#else
   case OMX_ALG_VIDEO_CodingHEVC: return COMPRESSION_HEVC;
   case OMX_ALG_VIDEO_CodingVP9: return COMPRESSION_VP9;
+#endif
   case OMX_VIDEO_CodingMax: return COMPRESSION_MAX;
   default:
     throw invalid_argument("coding");
@@ -274,11 +284,15 @@ static inline int ConvertToModuleAVCLevel(OMX_VIDEO_AVCLEVELTYPE const& level)
   case OMX_VIDEO_AVCLevel42: return 42;
   case OMX_VIDEO_AVCLevel5: return 50;
   case OMX_VIDEO_AVCLevel51: return 51;
+#ifdef ANDROID
+  case OMX_VIDEO_AVCLevel52: return 52;
+#endif
   default:
 
-    if(level == static_cast<OMX_VIDEO_AVCLEVELTYPE>(OMX_ALG_VIDEO_AVCLevel52))
-      return 52;
-
+#ifndef ANDROID
+      if(level == static_cast<OMX_VIDEO_AVCLEVELTYPE>(OMX_ALG_VIDEO_AVCLevel52))
+        return 52;
+#endif
     if(level == static_cast<OMX_VIDEO_AVCLEVELTYPE>(OMX_ALG_VIDEO_AVCLevel60))
       return 60;
 
@@ -345,7 +359,11 @@ OMX_VIDEO_AVCLEVELTYPE ConvertToOMXAVCLevel(ProfileLevelType const& profileLevel
   case 42: return OMX_VIDEO_AVCLevel42;
   case 50: return OMX_VIDEO_AVCLevel5;
   case 51: return OMX_VIDEO_AVCLevel51;
+#ifdef ANDROID
+  case 52: return OMX_VIDEO_AVCLevel52;
+#else
   case 52: return static_cast<OMX_VIDEO_AVCLEVELTYPE>(OMX_ALG_VIDEO_AVCLevel52);
+#endif
   case 60: return static_cast<OMX_VIDEO_AVCLEVELTYPE>(OMX_ALG_VIDEO_AVCLevel60);
   case 61: return static_cast<OMX_VIDEO_AVCLEVELTYPE>(OMX_ALG_VIDEO_AVCLevel61);
   case 62: return static_cast<OMX_VIDEO_AVCLEVELTYPE>(OMX_ALG_VIDEO_AVCLevel62);
