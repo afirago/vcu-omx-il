@@ -62,6 +62,7 @@ LIB_OMX_CORE_SRC := \
 LOCAL_SRC_FILES := \
 	$(LIB_OMX_CORE_SRC)
 
+LOCAL_VENDOR_MODULE := true
 LOCAL_MODULE := libOMX.allegro.core
 include $(BUILD_SHARED_LIBRARY)
 
@@ -120,6 +121,7 @@ LOCAL_SRC_FILES := \
 	$(OMX_WRAPPER_DEC_SRCS) \
 	$(OMX_SETTINGS_DEC_SRCS)
 
+LOCAL_VENDOR_MODULE := true
 LOCAL_MODULE := libOMX.allegro.video_decoder
 include $(BUILD_SHARED_LIBRARY)
 
@@ -180,6 +182,7 @@ LOCAL_SRC_FILES := \
 	$(OMX_SETTINGS_ENC_SRCS) \
 	$(OMX_WRAPPER_ENC_SRCS)
 
+LOCAL_VENDOR_MODULE := true
 LOCAL_MODULE := libOMX.allegro.video_encoder
 include $(BUILD_SHARED_LIBRARY)
 
@@ -213,6 +216,7 @@ EXE_OMX_DECODER_SRCS := \
 LOCAL_SRC_FILES := \
 	$(EXE_OMX_DECODER_SRCS)
 
+LOCAL_VENDOR_MODULE := true
 LOCAL_MODULE := omx_decoder
 include $(BUILD_EXECUTABLE)
 
@@ -248,6 +252,7 @@ EXE_OMX_ENCODER_SRCS:= \
 LOCAL_SRC_FILES := \
 	$(EXE_TEST_ENCODE_OMX_SRC)
 
+LOCAL_VENDOR_MODULE := true
 LOCAL_MODULE := omx_encoder
 include $(BUILD_EXECUTABLE)
 
@@ -273,6 +278,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libdl \
 	libui                   \
 
+LOCAL_VENDOR_MODULE := true
 LOCAL_MODULE := libstagefrighthw
 include $(BUILD_SHARED_LIBRARY)
 
