@@ -55,6 +55,7 @@ using std::shared_ptr;
   { \
     void FORCE_SEMICOLON()
 
+#ifndef ANDROID
 #define OMX_CATCH() \
   } \
   catch(OMX_ERRORTYPE& e) \
@@ -63,7 +64,17 @@ using std::shared_ptr;
     return e; \
   } \
   void FORCE_SEMICOLON()
+#else
+#define OMX_CATCH() \
+  } \
+  catch(OMX_ERRORTYPE& e) \
+  { \
+    return e; \
+  } \
+  void FORCE_SEMICOLON()
+#endif
 
+#ifndef ANDROID
 #define OMX_CATCH_CONFIG() \
   } \
   catch(OMX_ERRORTYPE& e) \
@@ -72,6 +83,15 @@ using std::shared_ptr;
     return e; \
   } \
   void FORCE_SEMICOLON()
+#else
+#define OMX_CATCH_CONFIG() \
+  } \
+  catch(OMX_ERRORTYPE& e) \
+  { \
+    return e; \
+  } \
+  void FORCE_SEMICOLON()
+#endif
 
 void Codec::ReturnEmptiedBuffer(uint8_t* emptied)
 {
@@ -538,11 +558,15 @@ OMX_ERRORTYPE Codec::GetParameter(OMX_IN OMX_INDEXTYPE index, OMX_INOUT OMX_PTR 
     return OMX_ErrorNone;
   }
   default:
+#ifndef ANDROID
     LOGE("%s is unsupported", ToStringOMXIndex.at(index));
+#endif
     return OMX_ErrorUnsupportedIndex;
   }
 
+#ifndef ANDROID
   LOGE("%s is unsupported", ToStringOMXIndex.at(index));
+#endif
   return OMX_ErrorUnsupportedIndex;
   OMX_CATCH();
 }
@@ -672,11 +696,16 @@ OMX_ERRORTYPE Codec::SetParameter(OMX_IN OMX_INDEXTYPE index, OMX_IN OMX_PTR par
     return OMX_ErrorNone;
   }
   default:
+
+#ifndef ANDROID
     LOGE("%s is unsupported", ToStringOMXIndex.at(index));
+#endif
     return OMX_ErrorUnsupportedIndex;
   }
 
+#ifndef ANDROID
   LOGE("%s is unsupported", ToStringOMXIndex.at(index));
+#endif
   return OMX_ErrorUnsupportedIndex;
   OMX_CATCH();
 }
@@ -859,6 +888,7 @@ OMX_ERRORTYPE Codec::GetConfig(OMX_IN OMX_INDEXTYPE index, OMX_INOUT OMX_PTR con
   OMXChecker::CheckNotNull(config);
   OMXChecker::CheckHeaderVersion(GetVersion(config));
   OMXChecker::CheckStateOperation(AL_GetConfig, state);
+
   switch(static_cast<OMX_U32>(index))
   {
   case OMX_IndexConfigVideoBitrate:
@@ -885,12 +915,14 @@ OMX_ERRORTYPE Codec::GetConfig(OMX_IN OMX_INDEXTYPE index, OMX_INOUT OMX_PTR con
     return OMX_ErrorNone;
   }
   default:
+#ifndef ANDROID
     LOGE("%s is unsupported", ToStringOMXIndex.at(index));
+#endif
     return OMX_ErrorUnsupportedIndex;
   }
-
+#ifndef ANDROID
   LOGE("%s is unsupported", ToStringOMXIndex.at(index));
-
+#endif
   return OMX_ErrorUnsupportedIndex;
   OMX_CATCH_CONFIG();
 }
@@ -953,11 +985,15 @@ OMX_ERRORTYPE Codec::SetConfig(OMX_IN OMX_INDEXTYPE index, OMX_IN OMX_PTR config
     return OMX_ErrorNone;
   }
   default:
+#ifndef ANDROID
     LOGE("%s is unsupported", ToStringOMXIndex.at(index));
+#endif
     return OMX_ErrorUnsupportedIndex;
   }
 
+#ifndef ANDROID
   LOGE("%s is unsupported", ToStringOMXIndex.at(index));
+#endif
   return OMX_ErrorUnsupportedIndex;
   OMX_CATCH_CONFIG();
 }

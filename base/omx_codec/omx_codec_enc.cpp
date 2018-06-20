@@ -51,6 +51,7 @@
   { \
     void FORCE_SEMICOLON()
 
+#ifndef ANDROID
 #define OMX_CATCH() \
   } \
   catch(OMX_ERRORTYPE & e) \
@@ -59,7 +60,17 @@
     return e; \
   } \
   void FORCE_SEMICOLON()
+#else
+#define OMX_CATCH() \
+  } \
+  catch(OMX_ERRORTYPE & e) \
+  { \
+    return e; \
+  } \
+  void FORCE_SEMICOLON()
+#endif
 
+#ifndef ANDROID
 #define OMX_CATCH_PARAMETER() \
   } \
   catch(OMX_ERRORTYPE & e) \
@@ -68,6 +79,15 @@
     return e; \
   } \
   void FORCE_SEMICOLON()
+#else
+#define OMX_CATCH_PARAMETER() \
+  } \
+  catch(OMX_ERRORTYPE & e) \
+  { \
+    return e; \
+  } \
+  void FORCE_SEMICOLON()
+#endif
 
 static EncModule& ToEncModule(ModuleInterface& module)
 {
@@ -587,11 +607,14 @@ OMX_ERRORTYPE EncCodec::GetParameter(OMX_IN OMX_INDEXTYPE index, OMX_INOUT OMX_P
     return OMX_ErrorNone;
   }
   default:
+#ifndef ANDROID
     LOGE("%s is unsupported", ToStringOMXIndex.at(index));
+#endif
     return OMX_ErrorUnsupportedIndex;
   }
-
+#ifndef ANDROID
   LOGE("%s is unsupported", ToStringOMXIndex.at(index));
+#endif
   return OMX_ErrorUnsupportedIndex;
   OMX_CATCH_PARAMETER();
 }
@@ -1340,11 +1363,15 @@ OMX_ERRORTYPE EncCodec::SetParameter(OMX_IN OMX_INDEXTYPE index, OMX_IN OMX_PTR 
     return OMX_ErrorNone;
   }
   default:
+#ifndef ANDROID
     LOGE("%s is unsupported", ToStringOMXIndex.at(index));
+#endif
     return OMX_ErrorUnsupportedIndex;
   }
 
+#ifndef ANDROID
   LOGE("%s is unsupported", ToStringOMXIndex.at(index));
+#endif
   return OMX_ErrorUnsupportedIndex;
   OMX_CATCH_PARAMETER();
 }
