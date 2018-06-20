@@ -241,7 +241,7 @@ LOCAL_C_INCLUDES := \
 	hardware/xilinx/vcu/vcu-ctrl-sw/include \
 	$(LOCAL_PATH)/omx_header_android
 
-EXE_OMX_ENCODER_SRCS:= \
+EXE_OMX_ENCODER_SRCS := \
 	exe_omx/encoder/main.cpp \
 	exe_omx/encoder/CommandsSender.cpp\
 	exe_omx/encoder/EncCmdMngr.cpp\
@@ -250,7 +250,7 @@ EXE_OMX_ENCODER_SRCS:= \
 	exe_omx/common/getters.cpp
 
 LOCAL_SRC_FILES := \
-	$(EXE_TEST_ENCODE_OMX_SRC)
+	$(EXE_OMX_ENCODER_SRCS)
 
 LOCAL_VENDOR_MODULE := true
 LOCAL_MODULE := omx_encoder
