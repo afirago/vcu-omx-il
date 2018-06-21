@@ -185,12 +185,14 @@ static OMX_ERRORTYPE ToOmxError(ErrorType error)
 {
   switch(error)
   {
+#ifndef ANDROID
   case ERROR_CHAN_CREATION_NO_CHANNEL_AVAILABLE:
     return OMX_ALG_ErrorNoChannelLeft;
   case ERROR_CHAN_CREATION_RESOURCE_UNAVAILABLE:
     return OMX_ALG_ErrorChannelResourceUnavailable;
   case ERROR_CHAN_CREATION_RESOURCE_FRAGMENTED:
     return OMX_ALG_ErrorChannelResourceFragmented;
+#endif
   case ERROR_NO_MEMORY:
     return OMX_ErrorInsufficientResources;
   case ERROR_BAD_PARAMETER:

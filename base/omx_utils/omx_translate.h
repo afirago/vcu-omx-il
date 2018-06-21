@@ -82,9 +82,11 @@ static std::map<OMX_ERRORTYPE, const char*> ToStringOMXError =
   { OMX_ErrorContentPipeCreationFailed, "OMX_ErrorContentPipeCreationFailed" },
   { OMX_ErrorSeperateTablesUsed, "OMX_ErrorSeperateTablesUsed" },
   { OMX_ErrorTunnelingUnsupported, "OMX_ErrorTunnelingUnsupported" },
+#ifndef ANDROID
   { OMX_ALG_ErrorNoChannelLeft, "OMX_ALG_ErrorNoChannelLeft" },
   { OMX_ALG_ErrorChannelResourceUnavailable, "OMX_ALG_ErrorChannelResourceUnavailable" },
   { OMX_ALG_ErrorChannelResourceFragmented, "OMX_ALG_ErrorChannelResourceFragmented" },
+#endif
   { static_cast<OMX_ERRORTYPE>(OMX_ErrorInvalidMode), "OMX_ErrorInvalidMode" },
 };
 
