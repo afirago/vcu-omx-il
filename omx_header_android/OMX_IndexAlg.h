@@ -84,6 +84,12 @@ typedef enum OMX_ALG_INDEXTYPE
   OMX_ALG_IndexConfigVideoRegionOfInterest,                   /**< reference: OMX_ALG_VIDEO_CONFIG_REGION_OF_INTEREST */
   OMX_ALG_IndexConfigVideoNotifySceneChange,                  /**< reference: OMX_ALG_VIDEO_CONFIG_NOTIFY_SCENE_CHANGE */
 
+  /* Extensions for NativeWindow configurations */
+  OMX_ALG_IndexExtEnableNativeBuffer,                 /**< reference: EnableNativeBuffer */
+  OMX_ALG_IndexExtGetNativeBufferUsage,               /**< reference: GetNativeBufferUsage */
+  OMX_ALG_IndexExtUseNativeBuffer,                    /**< reference: UseNativeBuffer */
+
+
   OMX_ALG_IndexMax = 0x7FFFFFFF
 } OMX_ALG_INDEXTYPE;
 

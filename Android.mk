@@ -84,7 +84,9 @@ LOCAL_CPPFLAGS += -fexceptions -std=c++11 -frtti
 
 LOCAL_C_INCLUDES := \
 	frameworks/native/include/media/openmax \
+	frameworks/native/libs/nativebase/include \
 	hardware/xilinx/vcu/vcu-ctrl-sw/include \
+	device/xilinx/common/gralloc \
 	$(LOCAL_PATH)/omx_header_android
 
 OMX_CODEC_DEC_SRCS := \
