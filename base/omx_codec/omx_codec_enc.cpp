@@ -490,11 +490,16 @@ OMX_ERRORTYPE EncCodec::GetParameter(OMX_IN OMX_INDEXTYPE index, OMX_INOUT OMX_P
   case OMX_IndexParamVideoPortFormat:
   {
     auto const port = getCurrentPort(param);
-    (void)port;
     auto p = (OMX_VIDEO_PARAM_PORTFORMATTYPE*)param;
 
     if(!GetVideoPortFormatSupported(*p, ToEncModule(*module)))
       return OMX_ErrorNoMore;
+
+    if (!IsInputPort(port->index))
+      p->eColorFormat = OMX_COLOR_FormatUnused;
+    else
+      p->eCompressionFormat = OMX_VIDEO_CodingUnused;
+
     return OMX_ErrorNone;
   }
   case OMX_IndexParamVideoProfileLevelCurrent:
@@ -809,22 +814,28 @@ static bool SetPortDefinition(OMX_PARAM_PORTDEFINITIONTYPE const& settings, Port
   auto const rollback = ConstructPortDefinition(port, module);
   auto const video = settings.format.video;
 
-  if(!SetFormat(video.eColorFormat, module))
+  if (IsInputPort(port.index))
   {
-    SetPortDefinition(rollback, port, module);
-    return false;
+    if(!SetFormat(video.eColorFormat, module))
+    {
+      SetPortDefinition(rollback, port, module);
+      return false;
+    }
+
+    if(!SetClock(video.xFramerate, module))
+    {
+      SetPortDefinition(rollback, port, module);
+      return false;
+    }
   }
 
-  if(!SetClock(video.xFramerate, module))
+  if (!IsInputPort(port.index))
   {
-    SetPortDefinition(rollback, port, module);
-    return false;
-  }
-
-  if(!SetTargetBitrate(video.nBitrate, module))
-  {
-    SetPortDefinition(rollback, port, module);
-    return false;
+    if(!SetTargetBitrate(video.nBitrate, module))
+    {
+      SetPortDefinition(rollback, port, module);
+      return false;
+    }
   }
 
   if(!SetResolution(video, module))
@@ -839,17 +850,19 @@ static bool SetPortDefinition(OMX_PARAM_PORTDEFINITIONTYPE const& settings, Port
 static bool SetVideoPortFormat(OMX_VIDEO_PARAM_PORTFORMATTYPE const& format, Port const& port, EncModule& module)
 {
   auto const rollback = ConstructVideoPortCurrentFormat(port, module);
-
-  if(!SetClock(format.xFramerate, module))
+  if (IsInputPort(port.index))
   {
-    SetVideoPortFormat(rollback, port, module);
-    return false;
-  }
+    if(!SetClock(format.xFramerate, module))
+    {
+      SetVideoPortFormat(rollback, port, module);
+      return false;
+    }
 
-  if(!SetFormat(format.eColorFormat, module))
-  {
-    SetVideoPortFormat(rollback, port, module);
-    return false;
+    if(!SetFormat(format.eColorFormat, module))
+    {
+      SetVideoPortFormat(rollback, port, module);
+      return false;
+    }
   }
   return true;
 }
@@ -897,10 +910,13 @@ static bool SetVideoBitrate(OMX_VIDEO_PARAM_BITRATETYPE const& bitrate, Port con
 {
   auto const rollback = ConstructVideoBitrate(port, module);
 
-  if(!SetBitrateMode(bitrate.nTargetBitrate, bitrate.eControlRate, module))
+  if (!IsInputPort(port.index))
   {
-    SetVideoBitrate(rollback, port, module);
-    return false;
+    if(!SetBitrateMode(bitrate.nTargetBitrate, bitrate.eControlRate, module))
+    {
+      SetVideoBitrate(rollback, port, module);
+      return false;
+    }
   }
   return true;
 }
@@ -1086,7 +1102,6 @@ OMX_ERRORTYPE EncCodec::SetParameter(OMX_IN OMX_INDEXTYPE index, OMX_IN OMX_PTR 
                           auto const index = *(((OMX_U32*)param) + 2);
                           return GetPort(index);
                         };
-
   isSettingsInit = false;
   switch(static_cast<OMX_U32>(index)) // all indexes are 32u
   {
@@ -1171,11 +1186,12 @@ OMX_ERRORTYPE EncCodec::SetParameter(OMX_IN OMX_INDEXTYPE index, OMX_IN OMX_PTR 
 
     if(!port->isTransientToDisable && port->enable)
       OMXChecker::CheckStateOperation(AL_SetParameter, state);
-
-    auto const bitrate = static_cast<OMX_VIDEO_PARAM_BITRATETYPE*>(param);
-
-    if(!SetVideoBitrate(*bitrate, *port, ToEncModule(*module)))
-      throw OMX_ErrorBadParameter;
+    if (!IsInputPort(port->index))
+    {
+      auto const bitrate = static_cast<OMX_VIDEO_PARAM_BITRATETYPE*>(param);
+      if(!SetVideoBitrate(*bitrate, *port, ToEncModule(*module)))
+        throw OMX_ErrorBadParameter;
+    }
     return OMX_ErrorNone;
   }
   case OMX_IndexParamVideoAvc:
