@@ -60,6 +60,7 @@ extern "C"
 #include <OMX_Types.h>
 #include <OMX_Video.h>
 #include <OMX_VideoExt.h>
+#include <OMX_VideoAlg.h>
 #include <OMX_ComponentExt.h>
 #include <OMX_IndexAlg.h>
 #include <OMX_IVCommonAlg.h>

@@ -38,6 +38,7 @@
 #pragma once
 
 #include <OMX_VideoExt.h>
+#include <OMX_VideoAlg.h>
 #include <OMX_ComponentAlg.h>
 #include <OMX_IVCommonAlg.h>
 

@@ -41,6 +41,7 @@
 #include <cassert>
 #include <OMX_Component.h>
 #include <OMX_IndexExt.h>
+#include <OMX_IndexAlg.h>
 
 Setters::Setters(OMX_HANDLETYPE* component) :
   component(component)
