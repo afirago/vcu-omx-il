@@ -1,5 +1,4 @@
 /*
- * Copyright (c) 2018 Allegro DVT2. All rights reserved.
  * Copyright (c) 2016 The Khronos Group Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
@@ -22,41 +21,43 @@
  *
  */
 
-/** OMX_CoreAlg.h - OpenMax IL version 1.1.2
- * The OMX_CoreAlg header file contains extensions to the definitions used
+/** OMX_ComponentExt.h - OpenMax IL version 1.1.2
+ * The OMX_ComponentExt header file contains extensions to the definitions used
  * by both the application and the component to access common items.
  */
 
-#ifndef OMX_CoreAlg_h
-#define OMX_CoreAlg_h
+#ifndef OMX_ComponentExt_h
+#define OMX_ComponentExt_h
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-/* Each OMX header shall include all required header files to allow the
+/* Each OMX header must include all required header files to allow the
  * header to compile without errors.  The includes below are required
  * for this header file to compile successfully
  */
+#include <OMX_Types.h>
+#include <OMX_ComponentAlg.h>
 
-// This buffer already exist in OpenMax IL version 1.2 (3.7.3.7.1)
-// Keep there names and values
-#define OMX_BUFFERFLAG_TIMESTAMPINVALID         0x00000100
-#define OMX_BUFFERFLAG_READONLY                 0x00000200
-#define OMX_BUFFERFLAG_ENDOFSUBFRAME            0x00000400
-#define OMX_BUFFERFLAG_SKIPFRAME                0x00000800
-// INTERLACED FLAG
-#define OMX_ALG_BUFFERFLAG_TOP_FIELD            0x00001000
-#define OMX_ALG_BUFFERFLAG_BOT_FIELD            0x00002000
+/** Set/query the commit mode */
+typedef struct OMX_CONFIG_COMMITMODETYPE
+{
+  OMX_U32 nSize;
+  OMX_VERSIONTYPE nVersion;
+  OMX_BOOL bDeferred;
+}OMX_CONFIG_COMMITMODETYPE;
 
-#define OMX_ALG_ErrorNoChannelLeft	(OMX_ErrorVendorStartUnused + 0x1000)
-#define OMX_ALG_ErrorChannelResourceUnavailable	(OMX_ErrorVendorStartUnused + 0x1001)
-#define OMX_ALG_ErrorChannelResourceFragmented	(OMX_ErrorVendorStartUnused + 0x1002)
+/** Explicit commit */
+typedef struct OMX_CONFIG_COMMITTYPE
+{
+  OMX_U32 nSize;
+  OMX_VERSIONTYPE nVersion;
+}OMX_CONFIG_COMMITTYPE;
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* OMX_CoreAlg_h */
-/* File EOF */
+#endif /* OMX_ComponentExt_h */
 

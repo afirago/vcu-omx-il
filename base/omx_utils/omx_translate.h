@@ -39,6 +39,7 @@
 
 #include <OMX_CoreExt.h>
 #include <OMX_IndexExt.h>
+#include <OMX_IndexAlg.h>
 #include <map>
 
 static std::map<OMX_ERRORTYPE, const char*> ToStringOMXError =
@@ -81,9 +82,9 @@ static std::map<OMX_ERRORTYPE, const char*> ToStringOMXError =
   { OMX_ErrorContentPipeCreationFailed, "OMX_ErrorContentPipeCreationFailed" },
   { OMX_ErrorSeperateTablesUsed, "OMX_ErrorSeperateTablesUsed" },
   { OMX_ErrorTunnelingUnsupported, "OMX_ErrorTunnelingUnsupported" },
-  { OMX_ALG_ErrorNoChannelLeft, "OMX_ALG_ErrorNoChannelLeft" },
-  { OMX_ALG_ErrorChannelResourceUnavailable, "OMX_ALG_ErrorChannelResourceUnavailable" },
-  { OMX_ALG_ErrorChannelResourceFragmented, "OMX_ALG_ErrorChannelResourceFragmented" },
+  { (OMX_ERRORTYPE)OMX_ALG_ErrorNoChannelLeft, "OMX_ALG_ErrorNoChannelLeft" },
+  { (OMX_ERRORTYPE)OMX_ALG_ErrorChannelResourceUnavailable, "OMX_ALG_ErrorChannelResourceUnavailable" },
+  { (OMX_ERRORTYPE)OMX_ALG_ErrorChannelResourceFragmented, "OMX_ALG_ErrorChannelResourceFragmented" },
   { static_cast<OMX_ERRORTYPE>(OMX_ErrorInvalidMode), "OMX_ErrorInvalidMode" },
 };
 
