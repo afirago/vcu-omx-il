@@ -178,10 +178,14 @@ Port* Component::GetPort(int index)
 
 static void AssociateSpecVersion(OMX_VERSIONTYPE& spec)
 {
-  spec.s.nVersionMajor = OMX_VERSION_MAJOR;
-  spec.s.nVersionMinor = OMX_VERSION_MINOR;
-  spec.s.nRevision = OMX_VERSION_REVISION;
-  spec.s.nStep = OMX_VERSION_STEP;
+#ifndef ANDROID
+  spec.s.nVersionMajor = OMX_VERSION_MAJOR;   spec.s.nVersionMajor = OMX_VERSION_MAJOR;
+  spec.s.nVersionMinor = OMX_VERSION_MINOR;   spec.s.nVersionMinor = OMX_VERSION_MINOR;
+  spec.s.nRevision = OMX_VERSION_REVISION;    spec.s.nRevision = OMX_VERSION_REVISION;
+  spec.s.nStep = OMX_VERSION_STEP;    spec.s.nStep = OMX_VERSION_STEP;
+#else
+  (void)(spec);
+#endif
 }
 
 Component::Component(OMX_HANDLETYPE component, shared_ptr<MediatypeInterface> media, unique_ptr<ModuleInterface>&& module, std::unique_ptr<Expertise>&& expertise, OMX_STRING name, OMX_STRING role) :
