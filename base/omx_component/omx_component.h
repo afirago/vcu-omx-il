@@ -64,7 +64,10 @@
   } \
   catch(OMX_ERRORTYPE& e) \
   { \
-    LOGE("%s", ToStringOMXError.at(e)); \
+    if (ToStringOMXError.count(e)) \
+      LOGE("%s", ToStringOMXError.at(e)); \
+    else \
+      LOGE("Unknown Error"); \
     f(e); \
     return e; \
   } \
@@ -74,7 +77,10 @@
   } \
   catch(OMX_ERRORTYPE& e) \
   { \
-    LOGE("%s", ToStringOMXError.at(e)); \
+    if (ToStringOMXError.count(e)) \
+      LOGE("%s", ToStringOMXError.at(e)); \
+    else \
+      LOGE("Unknown Error"); \
     return e; \
   } \
   void FORCE_SEMICOLON()
@@ -83,7 +89,10 @@
   } \
   catch(OMX_ERRORTYPE& e) \
   { \
-    LOGE("%s : %s", ToStringOMXIndex.at(index), ToStringOMXError.at(e)); \
+    if (ToStringOMXIndex.count(index) && ToStringOMXError.count(e)) \
+      LOGE("%s : %s", ToStringOMXIndex.at(index), ToStringOMXError.at(e)); \
+    else \
+      LOGE("Unknown Error"); \
     return e; \
   } \
   void FORCE_SEMICOLON()
@@ -92,7 +101,10 @@
   } \
   catch(OMX_ERRORTYPE& e) \
   { \
-    LOGE("%s : %s", ToStringOMXIndex.at(index), ToStringOMXError.at(e)); \
+    if (ToStringOMXIndex.count(index) && ToStringOMXError.count(e)) \
+      LOGE("%s : %s", ToStringOMXIndex.at(index), ToStringOMXError.at(e)); \
+    else \
+      LOGE("Unknown Error"); \
     return e; \
   } \
   void FORCE_SEMICOLON()
