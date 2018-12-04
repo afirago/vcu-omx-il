@@ -647,11 +647,11 @@ OMX_ERRORTYPE Component::GetParameter(OMX_IN OMX_INDEXTYPE index, OMX_INOUT OMX_
     return ConstructCommonSequencePictureMode(*mode, *port, media);
   }
   default:
-    LOGE("%s is unsupported", ToStringOMXIndex.at(index));
+    LOGE("index 0x%x is unsupported", index);
     return OMX_ErrorUnsupportedIndex;
   }
 
-  LOGE("%s is unsupported", ToStringOMXIndex.at(index));
+  LOGE("index 0x%x is unsupported", index);
   return OMX_ErrorUnsupportedIndex;
   OMX_CATCH_PARAMETER();
 }
@@ -844,11 +844,11 @@ OMX_ERRORTYPE Component::SetParameter(OMX_IN OMX_INDEXTYPE index, OMX_IN OMX_PTR
     return SetCommonSequencePictureMode(*spm, *port, media);
   }
   default:
-    LOGE("%s is unsupported", ToStringOMXIndex.at(index));
+    LOGE("index 0x%x is unsupported", index);
     return OMX_ErrorUnsupportedIndex;
   }
 
-  LOGE("%s is unsupported", ToStringOMXIndex.at(index));
+  LOGE("index 0x%x is unsupported", index);
   return OMX_ErrorUnsupportedIndex;
   OMX_CATCH_PARAMETER();
 }
@@ -1068,11 +1068,11 @@ OMX_ERRORTYPE Component::GetConfig(OMX_IN OMX_INDEXTYPE index, OMX_INOUT OMX_PTR
     return OMX_ErrorNone;
   }
   default:
-    LOGE("%s is unsupported", ToStringOMXIndex.at(index));
+    LOGE("index 0x%x is unsupported", index);
     return OMX_ErrorUnsupportedIndex;
   }
 
-  LOGE("%s is unsupported", ToStringOMXIndex.at(index));
+  LOGE("index 0x%x is unsupported", index);
 
   return OMX_ErrorUnsupportedIndex;
   OMX_CATCH_CONFIG();
@@ -1151,11 +1151,11 @@ OMX_ERRORTYPE Component::SetConfig(OMX_IN OMX_INDEXTYPE index, OMX_IN OMX_PTR co
   }
 
   default:
-    LOGE("%s is unsupported", ToStringOMXIndex.at(index));
+    LOGE("index 0x%x is unsupported", index);
     return OMX_ErrorUnsupportedIndex;
   }
 
-  LOGE("%s is unsupported", ToStringOMXIndex.at(index));
+  LOGE("index 0x%x is unsupported", index);
   return OMX_ErrorUnsupportedIndex;
   OMX_CATCH_CONFIG();
 }
