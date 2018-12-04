@@ -50,7 +50,8 @@ struct DecComponent : public Component
   OMX_ERRORTYPE GetExtensionIndex(OMX_IN OMX_STRING name, OMX_OUT OMX_INDEXTYPE* index) override;
   OMX_ERRORTYPE AllocateBuffer(OMX_INOUT OMX_BUFFERHEADERTYPE** header, OMX_IN OMX_U32 index, OMX_IN OMX_PTR app, OMX_IN OMX_U32 size) override;
   OMX_ERRORTYPE FreeBuffer(OMX_IN OMX_U32 index, OMX_IN OMX_BUFFERHEADERTYPE* header) override;
-
+  OMX_ERRORTYPE GetParameter(OMX_IN OMX_INDEXTYPE index, OMX_INOUT OMX_PTR param) override;
+  OMX_ERRORTYPE SetParameter(OMX_IN OMX_INDEXTYPE index, OMX_IN OMX_PTR param) override;
 private:
   struct PropagatedData
   {
@@ -67,6 +68,9 @@ private:
   void AssociateCallBack(BufferHandleInterface* empty, BufferHandleInterface* fill) override;
   void FillThisBufferCallBack(BufferHandleInterface* filled, int offset, int size) override;
   void EventCallBack(CallbackEventType type, void* data) override;
+
+  OMX_ERRORTYPE DecSetVideoPortFormat(OMX_VIDEO_PARAM_PORTFORMATTYPE const& format, Port const& port, std::shared_ptr<MediatypeInterface> media);
+  OMX_ERRORTYPE DecSetPortDefinition(OMX_PARAM_PORTDEFINITIONTYPE const& settings, Port& port, ModuleInterface& module, std::shared_ptr<MediatypeInterface> media);
 
   void TreatEmptyBufferCommand(Task* task) override;
   std::list<PropagatedData> transmit;
