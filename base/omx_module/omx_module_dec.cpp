@@ -48,6 +48,7 @@ extern "C"
 #include <lib_common_dec/IpDecFourCC.h>
 }
 
+#include "base/omx_utils/omx_log.h"
 #include "base/omx_mediatype/omx_convert_module_soft.h"
 #include "base/omx_mediatype/omx_convert_module_soft_dec.h"
 #include "base/omx_utils/round.h"
@@ -166,7 +167,7 @@ void DecModule::EndDecoding(AL_TBuffer* decodedFrame)
   {
     auto error = AL_Decoder_GetLastError(decoder);
 
-    fprintf(stderr, "/!\\ %s (%d)\n", ToStringDecodeError(error).c_str(), error);
+    LOGE("/!\\ %s (%d)\n", ToStringDecodeError(error).c_str(), error);
 
     if(error & AL_ERROR)
       callbacks.event(CALLBACK_EVENT_ERROR, (void*)ToModuleError(error));
@@ -263,7 +264,7 @@ ErrorType DecModule::CreateDecoder(bool shouldPrealloc)
 {
   if(decoder)
   {
-    fprintf(stderr, "Decoder is ALREADY created\n");
+    LOGE("Decoder is ALREADY created\n");
     return ERROR_UNDEFINED;
   }
 
@@ -277,7 +278,7 @@ ErrorType DecModule::CreateDecoder(bool shouldPrealloc)
 
   if(errorCode != AL_SUCCESS)
   {
-    fprintf(stderr, "Failed to create Decoder: %d\n", errorCode);
+    LOGE("Failed to create Decoder: %d\n", errorCode);
     return ToModuleError(errorCode);
   }
 
@@ -298,7 +299,7 @@ bool DecModule::DestroyDecoder()
 {
   if(!decoder)
   {
-    fprintf(stderr, "Decoder isn't created\n");
+    LOGE("Decoder isn't created\n");
     return false;
   }
 
@@ -320,7 +321,7 @@ bool DecModule::Create()
 {
   if(decoder)
   {
-    fprintf(stderr, "Decoder should NOT be created\n");
+    LOGE("Decoder should NOT be created\n");
     return false;
   }
   isCreated = true;
@@ -381,7 +382,7 @@ void* DecModule::Allocate(size_t size)
 
   if(!handle)
   {
-    fprintf(stderr, "No more memory\n");
+    LOGE("No more memory\n");
     return nullptr;
   }
 
@@ -397,7 +398,7 @@ int DecModule::AllocateDMA(int size)
 
   if(!handle)
   {
-    fprintf(stderr, "No more memory\n");
+    LOGE("No more memory\n");
     return -1;
   }
 
@@ -452,7 +453,7 @@ AL_TBuffer* DecModule::CreateInputBuffer(char* buffer, int size)
 
     if(!dmaHandle)
     {
-      fprintf(stderr, "Failed to import fd : %i\n", fd);
+      LOGE("Failed to import fd : %i\n", fd);
       return nullptr;
     }
 
@@ -557,7 +558,7 @@ AL_TBuffer* DecModule::CreateOutputBuffer(char* buffer, int size)
 
     if(!dmaHandle)
     {
-      fprintf(stderr, "Failed to import fd : %i\n", fd);
+      LOGE("Failed to import fd : %i\n", fd);
       ((AL_TMetaData*)sourceMeta)->MetaDestroy((AL_TMetaData*)sourceMeta);
       return nullptr;
     }
@@ -621,13 +622,13 @@ ErrorType DecModule::Run(bool shouldPrealloc)
 {
   if(decoder)
   {
-    fprintf(stderr, "You can't call Run twice\n");
+    LOGE("You can't call Run twice\n");
     return ERROR_UNDEFINED;
   }
 
   if(!isCreated)
   {
-    fprintf(stderr, "You should call Create before Run\n");
+    LOGE("You should call Create before Run\n");
     return ERROR_UNDEFINED;
   }
 

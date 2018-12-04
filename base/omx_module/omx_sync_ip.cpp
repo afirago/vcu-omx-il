@@ -52,6 +52,7 @@ extern "C"
 #include <lib_common/HardwareDriver.h>
 }
 
+#include "base/omx_utils/omx_log.h"
 #include "base/omx_checker/omx_checker.h"
 #include "base/omx_mediatype/omx_convert_module_soft_enc.h"
 #include "base/omx_mediatype/omx_convert_module_soft.h"
@@ -118,7 +119,7 @@ AL_TBuffer* CreateBuffer(AL_TLinuxDmaAllocator* allocator, int fd, int size)
 
   if(!dmaHandle)
   {
-    fprintf(stderr, "SyncIp: Failed to import fd : %i\n", fd);
+    LOGE("SyncIp: Failed to import fd : %i\n", fd);
     return nullptr;
   }
 

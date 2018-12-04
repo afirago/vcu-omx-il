@@ -55,6 +55,7 @@ extern "C"
 #include <lib_fpga/DmaAllocLinux.h>
 }
 
+#include "base/omx_utils/omx_log.h"
 #include "base/omx_checker/omx_checker.h"
 #include "base/omx_mediatype/omx_convert_module_soft_enc.h"
 #include "base/omx_mediatype/omx_convert_module_soft.h"
@@ -176,7 +177,7 @@ ErrorType EncModule::CreateEncoder()
 {
   if(encoders.size())
   {
-    fprintf(stderr, "Encoder is ALREADY created\n");
+    LOGE("Encoder is ALREADY created\n");
     return ERROR_UNDEFINED;
   }
 
@@ -185,7 +186,7 @@ ErrorType EncModule::CreateEncoder()
 
   if(!roiCtx)
   {
-    fprintf(stderr, "Failed to create ROI manager:\n");
+    LOGE("Failed to create ROI manager:\n");
     return ERROR_BAD_PARAMETER;
   }
 
@@ -219,8 +220,8 @@ ErrorType EncModule::CreateEncoder()
 
     if(errorCode != AL_SUCCESS)
     {
-      fprintf(stderr, "Failed to create Encoder:\n");
-      fprintf(stderr, "/!\\ %s (%d)\n", ToStringEncodeError(errorCode).c_str(), errorCode);
+      LOGE("Failed to create Encoder:\n");
+      LOGE("/!\\ %s (%d)\n", ToStringEncodeError(errorCode).c_str(), errorCode);
       return ToModuleError(errorCode);
     }
 
@@ -244,7 +245,7 @@ bool EncModule::DestroyEncoder()
 {
   if(!encoders.size())
   {
-    fprintf(stderr, "Encoder isn't created\n");
+    LOGE("Encoder isn't created\n");
     return false;
   }
 
@@ -282,7 +283,7 @@ bool EncModule::DestroyEncoder()
 
   if(!roiCtx)
   {
-    fprintf(stderr, "ROI manager isn't created\n");
+    LOGE("ROI manager isn't created\n");
     return false;
   }
   AL_RoiMngr_Destroy(roiCtx);
@@ -306,7 +307,7 @@ bool EncModule::Create()
 {
   if(encoders.size())
   {
-    fprintf(stderr, "Encoder should NOT be created\n");
+    LOGE("Encoder should NOT be created\n");
     return false;
   }
   isCreated = true;
@@ -324,13 +325,13 @@ ErrorType EncModule::Run(bool)
 {
   if(encoders.size())
   {
-    fprintf(stderr, "You can't call Run twice\n");
+    LOGE("You can't call Run twice\n");
     return ERROR_UNDEFINED;
   }
 
   if(!isCreated)
   {
-    fprintf(stderr, "You should call Create before Run\n");
+    LOGE("You should call Create before Run\n");
     return ERROR_UNDEFINED;
   }
 
@@ -462,7 +463,7 @@ void* EncModule::Allocate(size_t size)
 
   if(!handle)
   {
-    fprintf(stderr, "No more memory\n");
+    LOGE("No more memory\n");
     return nullptr;
   }
 
@@ -478,7 +479,7 @@ int EncModule::AllocateDMA(int size)
 
   if(!handle)
   {
-    fprintf(stderr, "No more memory\n");
+    LOGE("No more memory\n");
     return -1;
   }
 
@@ -538,7 +539,7 @@ bool EncModule::UseDMA(BufferHandleInterface* handle, int fd, int size)
 
   if(!dmaHandle)
   {
-    fprintf(stderr, "Failed to import fd : %i\n", fd);
+    LOGE("Failed to import fd : %i\n", fd);
     return false;
   }
 
@@ -813,7 +814,7 @@ void EncModule::EndEncoding(AL_TBuffer* stream, AL_TBuffer const* source)
 
   if(errorCode != AL_SUCCESS)
   {
-    fprintf(stderr, "/!\\ %s (%d)\n", ToStringEncodeError(errorCode).c_str(), errorCode);
+    LOGE("/!\\ %s (%d)\n", ToStringEncodeError(errorCode).c_str(), errorCode);
 
     if((errorCode & AL_ERROR) && (errorCode != AL_ERR_STREAM_OVERFLOW))
       callbacks.event(CALLBACK_EVENT_ERROR, (void*)ToModuleError(errorCode));
@@ -910,7 +911,7 @@ void EncModule::EndEncodingLookAhead(AL_TBuffer* stream, AL_TBuffer const* sourc
 
   if(errorCode != AL_SUCCESS)
   {
-    fprintf(stderr, "/!\\ %s (%d)\n", ToStringEncodeError(errorCode).c_str(), errorCode);
+    LOGE("/!\\ %s (%d)\n", ToStringEncodeError(errorCode).c_str(), errorCode);
 
     if((errorCode & AL_ERROR) && (errorCode != AL_ERR_STREAM_OVERFLOW))
       callbacks.event(CALLBACK_EVENT_ERROR, (void*)ToModuleError(errorCode));
