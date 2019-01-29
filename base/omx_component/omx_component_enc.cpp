@@ -49,6 +49,10 @@
 
 #include "omx_component_getset.h"
 
+#ifdef ANDROID
+#include <media/hardware/HardwareAPI.h>
+#endif
+
 using namespace std;
 
 static EncModule& ToEncModule(ModuleInterface& module)
@@ -395,6 +399,20 @@ OMX_ERRORTYPE EncComponent::GetParameter(OMX_IN OMX_INDEXTYPE index, OMX_INOUT O
     auto port = getCurrentPort(param);
     return expertise->GetExpertise(param, *port, media);
   }
+  case OMX_IndexParamVideoHevc:
+  {
+    auto port = getCurrentPort(param);
+    auto hevcType = static_cast<OMX_VIDEO_PARAM_HEVCTYPE*>(param);
+    hevcType->nKeyFrameInterval = 0; // unspecified; FIXME
+
+    OMX_VIDEO_PARAM_PROFILELEVELTYPE levelType;
+    auto ret = expertise->GetProfileLevel((OMX_PTR)(&levelType), *port, media);
+    if (ret != OMX_ErrorNone)
+      return ret;
+    hevcType->eProfile = static_cast<OMX_VIDEO_HEVCPROFILETYPE>(levelType.eProfile);
+    hevcType->eLevel = static_cast<OMX_VIDEO_HEVCLEVELTYPE>(levelType.eLevel);
+    return OMX_ErrorNone;
+  }
   case OMX_ALG_IndexParamReportedLatency: // GetParameter only
   {
     auto lat = static_cast<OMX_ALG_PARAM_REPORTED_LATENCY*>(param);
@@ -717,6 +735,20 @@ OMX_ERRORTYPE EncComponent::SetParameter(OMX_IN OMX_INDEXTYPE index, OMX_IN OMX_
   case OMX_ALG_IndexParamVideoHevc:
   {
     return expertise->SetExpertise(param, *port, media);
+  }
+  case OMX_IndexParamVideoHevc:
+  {
+    auto hevcType = static_cast<OMX_VIDEO_PARAM_HEVCTYPE*>(param);
+
+    OMX_VIDEO_PARAM_PROFILELEVELTYPE levelType;
+    auto ret = expertise->GetProfileLevel((OMX_PTR)(&levelType), *port, media);
+    if (ret != OMX_ErrorNone)
+      return ret;
+
+    levelType.eProfile = hevcType->eProfile;
+    levelType.eLevel = hevcType->eLevel;
+
+    return expertise->SetProfileLevel((OMX_PTR)(&levelType), *port, media);
   }
   case OMX_ALG_IndexParamVideoSubframe:
   {
