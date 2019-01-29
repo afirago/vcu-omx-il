@@ -95,7 +95,7 @@ static void AddEncoderFlags(OMXBufferHandle* handle, EncModule& module)
     handle->header->nFlags |= OMX_BUFFERFLAG_ENDOFFRAME;
 
   if(flags.isEndOfSlice)
-    handle->header->nFlags |= OMX_BUFFERFLAG_ENDOFSUBFRAME;
+    handle->header->nFlags |= OMX_BUFFERFLAG_CODECCONFIG;
 }
 
 void EncComponent::AssociateCallBack(BufferHandleInterface* empty_, BufferHandleInterface* fill_)
