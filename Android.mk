@@ -22,39 +22,35 @@ LOCAL_PATH := $(call my-dir)
 OMX_CHECKER_SRCS := \
 	base/omx_checker/omx_checker.cpp
 
-OMX_MEDIATYPE_COMMON_SRCS := \
-	base/omx_mediatype/omx_convert_module_soft.cpp \
-	base/omx_mediatype/omx_convert_module_soft_avc.cpp \
-	base/omx_mediatype/omx_convert_module_soft_hevc.cpp \
-	base/omx_mediatype/omx_mediatype_interface.cpp \
-	base/omx_mediatype/omx_mediatype_checks.cpp \
-	base/omx_mediatype/omx_mediatype_common.cpp \
-	base/omx_mediatype/omx_mediatype_common_avc.cpp \
-	base/omx_mediatype/omx_mediatype_common_hevc.cpp
-
-OMX_MODULE_COMMON_SRCS := \
-	base/omx_module/omx_module_interface.cpp \
-	base/omx_module/omx_buffer_handle_interface.cpp \
-	base/omx_module/omx_sync_ip_interface.cpp \
-	base/omx_module/SyncIp.cpp \
-	base/omx_module/SyncLog.cpp \
-	base/omx_module/DummySyncDriver.cpp \
-
-OMX_WRAPPER_COMMON_SRCS := \
-	base/omx_wrapper/omx_wrapper.cpp
-
 OMX_COMPONENT_COMMON_SRCS := \
 	base/omx_component/omx_component_interface.cpp \
 	base/omx_component/omx_component.cpp \
 	base/omx_component/omx_convert_omx_media.cpp \
 	base/omx_component/omx_buffer_handle.cpp \
 	base/omx_component/omx_component_getset.cpp \
+	base/omx_component/omx_expertise_interface.cpp \
 	base/omx_component/omx_expertise_avc.cpp \
 	base/omx_component/omx_expertise_hevc.cpp
 
+OMX_MODULE_CODEC_SRCS := \
+	base/omx_module/convert_module_soft.cpp \
+	base/omx_module/convert_module_soft_avc.cpp \
+	base/omx_module/convert_module_soft_hevc.cpp \
+	base/omx_module/mediatype_interface.cpp \
+	base/omx_module/mediatype_checks.cpp \
+	base/omx_module/mediatype_codec_itu.cpp \
+	base/omx_module/mediatype_codec_avc.cpp \
+	base/omx_module/mediatype_codec_hevc.cpp \
+	base/omx_module/mediatype_dummy.cpp \
+	base/omx_module/module_interface.cpp \
+	base/omx_module/module_dummy.cpp \
+	base/omx_module/buffer_handle_interface.cpp
+
+OMX_WRAPPER_COMMON_SRCS := \
+	base/omx_wrapper/omx_wrapper_common_entry_point.cpp
+
 EXE_OMX_COMMON_SRCS := \
 	exe_omx/common//getters.cpp \
-	exe_omx/common//setters.cpp \
 	exe_omx/common//helpers.cpp
 
 ##################################
@@ -75,7 +71,7 @@ LOCAL_C_INCLUDES := \
 	frameworks/native/include/media/openmax
 
 LIB_OMX_CORE_SRC := \
-	core/omx_core/omx_core.cpp
+	core/omx_core.cpp
 
 LOCAL_SRC_FILES := \
 	$(LIB_OMX_CORE_SRC)
@@ -112,30 +108,27 @@ LOCAL_C_INCLUDES := \
 OMX_COMPONENT_DEC_SRCS := \
 	base/omx_component/omx_component_dec.cpp
 
-OMX_MEDIATYPE_DEC_SRCS := \
-	base/omx_mediatype/omx_mediatype_dec_avc.cpp \
-	base/omx_mediatype/omx_mediatype_dec_hevc.cpp \
-	base/omx_mediatype/omx_mediatype_dec_common.cpp \
-	base/omx_mediatype/omx_convert_module_soft_dec.cpp
-
 OMX_MODULE_DEC_SRCS := \
-	base/omx_module/omx_module_dec.cpp \
-	base/omx_module/omx_device_dec_interface.cpp \
-	base/omx_module/omx_device_dec_hardware_mcu.cpp
+	base/omx_module/mediatype_dec_avc.cpp \
+	base/omx_module/mediatype_dec_hevc.cpp \
+	base/omx_module/mediatype_dec_itu.cpp \
+	base/omx_module/convert_module_soft_dec.cpp \
+	base/omx_module/module_dec.cpp \
+	base/omx_module/device_dec_interface.cpp \
+	base/omx_module/device_dec_hardware_mcu.cpp
 
 OMX_WRAPPER_DEC_SRCS := \
 	base/omx_wrapper/omx_wrapper_dec.cpp \
+	base/omx_wrapper/omx_wrapper_dec_entry_point.cpp
 
 LOCAL_SRC_FILES := \
 	$(OMX_CHECKER_SRCS) \
+	$(OMX_WRAPPER_COMMON_SRCS) \
+	$(OMX_COMPONENT_COMMON_SRCS) \
 	$(OMX_COMPONENT_DEC_SRCS) \
-	$(OMX_MEDIATYPE_DEC_SRCS) \
 	$(OMX_MODULE_DEC_SRCS) \
 	$(OMX_WRAPPER_DEC_SRCS) \
-	$(OMX_MEDIATYPE_COMMON_SRCS) \
-	$(OMX_MODULE_COMMON_SRCS) \
-	$(OMX_WRAPPER_COMMON_SRCS) \
-	$(OMX_COMPONENT_COMMON_SRCS)
+	$(OMX_MODULE_CODEC_SRCS) \
 
 LOCAL_VENDOR_MODULE := true
 LOCAL_MODULE := libOMX.allegro.video_decoder
@@ -170,34 +163,33 @@ LOCAL_C_INCLUDES := \
 OMX_COMPONENT_ENC_SRCS := \
 	base/omx_component/omx_component_enc.cpp
 
-OMX_MEDIATYPE_ENC_SRCS := \
-	base/omx_mediatype/omx_mediatype_enc_avc.cpp \
-	base/omx_mediatype/omx_mediatype_enc_hevc.cpp \
-	base/omx_mediatype/omx_mediatype_enc_common.cpp \
-	base/omx_mediatype/omx_convert_module_soft_enc.cpp
-
 OMX_MODULE_ENC_SRCS := \
-	base/omx_module/omx_module_enc.cpp \
-	base/omx_module/omx_device_enc_interface.cpp \
-	base/omx_module/omx_device_enc_hardware_mcu.cpp \
+	base/omx_module/mediatype_enc_avc.cpp \
+	base/omx_module/mediatype_enc_hevc.cpp \
+	base/omx_module/mediatype_enc_itu.cpp \
+	base/omx_module/convert_module_soft_enc.cpp \
+	base/omx_module/module_enc.cpp \
+	base/omx_module/memory_interface.cpp \
+	base/omx_module/dma_memory.cpp \
+	base/omx_module/cpp_memory.cpp \
+	base/omx_module/device_enc_interface.cpp \
+	base/omx_module/device_enc_hardware_mcu.cpp \
 	base/omx_module/ROIMngr.cpp \
 	base/omx_module/TwoPassMngr.cpp \
-	base/omx_module/omx_convert_module_soft_roi.cpp \
-	base/omx_module/omx_sync_ip.cpp
+	base/omx_module/convert_module_soft_roi.cpp
 
 OMX_WRAPPER_ENC_SRCS := \
 	base/omx_wrapper/omx_wrapper_enc.cpp \
+	base/omx_wrapper/omx_wrapper_enc_entry_point.cpp
 
 LOCAL_SRC_FILES := \
 	$(OMX_CHECKER_SRCS) \
+	$(OMX_WRAPPER_COMMON_SRCS) \
+	$(OMX_COMPONENT_COMMON_SRCS) \
 	$(OMX_COMPONENT_ENC_SRCS) \
-	$(OMX_MEDIATYPE_ENC_SRCS) \
 	$(OMX_MODULE_ENC_SRCS) \
 	$(OMX_WRAPPER_ENC_SRCS) \
-	$(OMX_MEDIATYPE_COMMON_SRCS) \
-	$(OMX_MODULE_COMMON_SRCS) \
-	$(OMX_WRAPPER_COMMON_SRCS) \
-	$(OMX_COMPONENT_COMMON_SRCS)
+	$(OMX_MODULE_CODEC_SRCS)
 
 LOCAL_VENDOR_MODULE := true
 LOCAL_MODULE := libOMX.allegro.video_encoder
