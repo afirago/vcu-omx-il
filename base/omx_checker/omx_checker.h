@@ -132,7 +132,9 @@ struct OMXChecker
   {
     memset(&header, 0x0, sizeof(T));
     header.nSize = sizeof(header);
+  #ifndef ANDROID
     header.nVersion.nVersion = OMX_VERSION;
+  #endif
   }
 
   /*************************************************************************//*!
@@ -144,8 +146,17 @@ struct OMXChecker
   inline
   void CheckHeaderVersion(OMX_VERSIONTYPE version)
   {
+    /*
+    FIXME:
+    nVersion set by Android doesn't match with one set by VCU OMX IL.
+    Skip version checking for now.
+    */
+#ifndef ANDROID
     if(version.nVersion != OMX_VERSION)
       throw OMX_ErrorVersionMismatch;
+#else
+    (void)(version);
+#endif
   };
 };
 
