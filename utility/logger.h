@@ -37,10 +37,7 @@
 
 #pragma once
 
-#include <utility/processor_fifo.h>
-#include <memory>
 #include <string>
-#include <chrono>
 #include <sstream>
 
 static inline std::string ToStringAddr(void* addr)
@@ -54,6 +51,10 @@ static inline std::string ToStringAddr(void* addr)
   return ss.str();
 }
 
+#ifndef ANDROID
+#include <utility/processor_fifo.h>
+#include <memory>
+#include <chrono>
 struct Logger
 {
   enum TraceType
@@ -175,3 +176,31 @@ private:
     Logger::GetSingleton().log(Logger::TraceType::VCD_WITH_VALUE, 10, std::string { wire } +std::string { ' ' } +std::to_string(value), Logger::GetTime(), __func__, __FILE__, __LINE__); \
   } while(0)
 
+#else // ANDROID case
+
+#include <log/log.h>
+
+#define LOG_ERROR(msg) \
+  do { \
+    std::string s(msg); \
+    ALOGE("%s %s %d", s.c_str(), __func__, __LINE__); \
+  } while(0)
+
+#define LOG_WARNING(msg) \
+  do { \
+    std::string s(msg); \
+    ALOGW("%s %s %d", s.c_str(), __func__, __LINE__); \
+  } while(0)
+
+#define LOG_IMPORTANT(msg) \
+  do { \
+    std::string s(msg); \
+    ALOGI("%s %s %d", s.c_str(), __func__, __LINE__); \
+  } while(0)
+
+#define LOG_VERBOSE(msg) \
+  do { \
+    std::string s(msg); \
+    ALOGV("%s %s %d", s.c_str(), __func__, __LINE__); \
+  } while(0)
+#endif //ANDROID
