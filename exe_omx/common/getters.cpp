@@ -42,6 +42,7 @@
 #include <OMX_Component.h>
 #include <OMX_ComponentExt.h>
 #include <OMX_IndexExt.h>
+#include <OMX_IndexAlg.h>
 
 Getters::Getters(OMX_HANDLETYPE* component) :
   component(component)

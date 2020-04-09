@@ -38,6 +38,7 @@
 #pragma once
 
 #include <OMX_CoreExt.h>
+#include <OMX_IndexAlg.h>
 #include <OMX_IndexExt.h>
 #include <map>
 #include <string>
