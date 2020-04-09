@@ -52,13 +52,6 @@
 #include <atomic>
 #include <unistd.h>
 
-#if defined(ANDROID) || defined(__ANDROID_API__)
-#define LOG_NDEBUG 0
-#define LOG_TAG "AL_OMX_MAIN_EXE"
-#include <android/log.h>
-#include "HardwareAPI.h"
-#endif /* ANDROID */
-
 #include <OMX_Core.h>
 #include <OMX_Component.h>
 #include <OMX_Types.h>
