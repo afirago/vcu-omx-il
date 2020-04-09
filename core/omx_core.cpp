@@ -47,6 +47,10 @@
 #include <OMX_Component.h>
 #include <stdexcept>
 
+#if ANDROID
+#include <utils/Log.h>
+#endif
+
 using namespace std;
 
 static int constexpr NB_OF_COMP = sizeof(AL_COMP_LIST) / sizeof(omx_comp_type);
@@ -65,6 +69,7 @@ static omx_comp_type const* getComp(char* cComponentName)
   return nullptr;
 }
 
+#ifndef ANDROID
 OMX_ERRORTYPE OMX_APIENTRY OMX_Init(void)
 {
   LOG_IMPORTANT();
@@ -100,11 +105,36 @@ OMX_ERRORTYPE OMX_APIENTRY OMX_Init(void)
 
   return OMX_ErrorNone;
 }
+#else
+OMX_ERRORTYPE OMX_APIENTRY OMX_Init(void)
+{
+  auto uNumLibraryLoad = 0;
+
+  for(unsigned int i = 0; i < NB_OF_COMP; i++)
+  {
+    char cCodecName[OMX_MAX_STRINGNAME_SIZE] =
+    {
+      0
+    };
+    strncat(cCodecName, AL_COMP_LIST[i].pSoLibName, strlen(AL_COMP_LIST[i].pSoLibName));
+
+    AL_COMP_LIST[i].pLibHandle = dlopen(cCodecName, RTLD_LAZY);
+
+    if(!AL_COMP_LIST[i].pLibHandle)
+      ALOGE("Error loading OMX component: %s", dlerror());
+    else
+      uNumLibraryLoad++;
+  }
+
+  if(uNumLibraryLoad == 0)
+    return OMX_ErrorUndefined;
+
+  return OMX_ErrorNone;
+}
+#endif
 
 OMX_ERRORTYPE OMX_APIENTRY OMX_Deinit(void)
 {
-  LOG_IMPORTANT();
-
   for(int i = 0; i < NB_OF_COMP; i++)
   {
     if(AL_COMP_LIST[i].pLibHandle == nullptr)
