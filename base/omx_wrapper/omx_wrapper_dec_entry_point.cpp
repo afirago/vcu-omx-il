@@ -38,7 +38,7 @@
 #include <utility/logger.h>
 #include "base/omx_component/omx_component_interface.h"
 #include "base/omx_checker/omx_checker.h"
-#include "omx_wrapper_common_entry_point.cpp"
+#include "omx_wrapper_common_entry_point.h"
 #include "omx_wrapper_dec.h"
 
 #include <OMX_Core.h>
@@ -46,7 +46,7 @@
 
 static OMX_ERRORTYPE ComponentDeInit(OMX_IN OMX_HANDLETYPE hComponent)
 {
-  LOG_IMPORTANT(string { "hComponent: " } +ToStringAddr(hComponent));
+  LOG_IMPORTANT(std::string { "hComponent: " } +ToStringAddr(hComponent));
   auto pThis = GetThis(hComponent);
 
   if(!pThis)

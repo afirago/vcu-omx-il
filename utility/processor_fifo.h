@@ -40,6 +40,7 @@
 #include <utility/locked_queue.h>
 #include <thread>
 #include <functional>
+#include <string>
 
 #if defined __linux__
 #include <sys/prctl.h>
