@@ -80,6 +80,15 @@ void DecMediatypeAVC::Reset()
   settings.bUseIFramesAsSyncPoint = true;
   settings.bSplitInput = true;
 
+#ifdef ANDROID
+  auto& stream = settings.tStream;
+  stream.tDim = { 3840, 2176 };
+  stream.eChroma = AL_CHROMA_4_2_0;
+  stream.iBitDepth = 8;
+  stream.iLevel = 51;
+  stream.iProfileIdc = AL_PROFILE_AVC_HIGH_422;
+  stream.eSequenceMode = AL_SM_PROGRESSIVE;
+#else
   auto& stream = settings.tStream;
   stream.tDim = { 176, 144 };
   stream.eChroma = AL_CHROMA_4_2_0;
@@ -87,6 +96,7 @@ void DecMediatypeAVC::Reset()
   stream.iLevel = 10;
   stream.iProfileIdc = AL_PROFILE_AVC_C_BASELINE;
   stream.eSequenceMode = AL_SM_PROGRESSIVE;
+#endif
 
   stride = RoundUp(static_cast<int>(AL_Decoder_GetMinPitch(stream.tDim.iWidth, stream.iBitDepth, settings.eFBStorageMode)), strideAlignments.horizontal);
   sliceHeight = RoundUp(static_cast<int>(AL_Decoder_GetMinStrideHeight(stream.tDim.iHeight)), strideAlignments.vertical);
