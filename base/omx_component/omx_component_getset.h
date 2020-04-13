@@ -62,11 +62,13 @@ OMX_ERRORTYPE SetPortBufferMode(OMX_ALG_PORT_PARAM_BUFFER_MODE const& portBuffer
 OMX_ERRORTYPE GetVideoPortFormatSupported(OMX_VIDEO_PARAM_PORTFORMATTYPE& format, std::shared_ptr<MediatypeInterface> media);
 OMX_ERRORTYPE ConstructVideoPortCurrentFormat(OMX_VIDEO_PARAM_PORTFORMATTYPE& f, Port const& port, std::shared_ptr<MediatypeInterface> media);
 OMX_ERRORTYPE SetVideoPortFormat(OMX_VIDEO_PARAM_PORTFORMATTYPE const& format, Port const& port, std::shared_ptr<MediatypeInterface> media);
+OMX_ERRORTYPE DecSetVideoPortFormat(OMX_VIDEO_PARAM_PORTFORMATTYPE const& format, Port const& port, std::shared_ptr<MediatypeInterface> media);
 
 OMX_ERRORTYPE SetClock(OMX_U32 framerateInQ16, std::shared_ptr<MediatypeInterface> media);
 
 OMX_ERRORTYPE ConstructPortDefinition(OMX_PARAM_PORTDEFINITIONTYPE& def, Port& port, std::shared_ptr<MediatypeInterface> media);
 OMX_ERRORTYPE SetPortDefinition(OMX_PARAM_PORTDEFINITIONTYPE const& settings, Port& port, ModuleInterface& module, std::shared_ptr<MediatypeInterface> media);
+OMX_ERRORTYPE DecSetPortDefinition(OMX_PARAM_PORTDEFINITIONTYPE const& settings, Port& port, ModuleInterface& module, std::shared_ptr<MediatypeInterface> media);
 
 // Encoder
 

@@ -82,6 +82,15 @@ static OMX_U32 constexpr ALLEGRODVT_OMX_VERSION = 3;
   } \
   void FORCE_SEMICOLON()
 
+#define OMX_CATCH_PARAMETER_OR_CONFIG() \
+  } \
+  catch(OMX_ERRORTYPE& e) \
+  { \
+    LOG_ERROR(ToStringOMXIndex(index) + string { ": " } +ToStringOMXError(e)); \
+    return e; \
+  } \
+  void FORCE_SEMICOLON()
+
 struct OMXSei
 {
   OMX_ALG_VIDEO_CONFIG_SEI configSei;
@@ -107,8 +116,8 @@ struct Component : public OMXComponentInterface
 
   OMX_ERRORTYPE GetComponentVersion(OMX_OUT OMX_STRING name, OMX_OUT OMX_VERSIONTYPE* version, OMX_OUT OMX_VERSIONTYPE* spec) override;
 
-  OMX_ERRORTYPE GetParameter(OMX_IN OMX_INDEXTYPE index, OMX_INOUT OMX_PTR param) override;
-  OMX_ERRORTYPE SetParameter(OMX_IN OMX_INDEXTYPE index, OMX_IN OMX_PTR param) override;
+  virtual OMX_ERRORTYPE GetParameter(OMX_IN OMX_INDEXTYPE index, OMX_INOUT OMX_PTR param) override;
+  virtual OMX_ERRORTYPE SetParameter(OMX_IN OMX_INDEXTYPE index, OMX_IN OMX_PTR param) override;
   OMX_ERRORTYPE GetExtensionIndex(OMX_IN OMX_STRING name, OMX_OUT OMX_INDEXTYPE* index) override;
   OMX_ERRORTYPE GetConfig(OMX_IN OMX_INDEXTYPE index, OMX_INOUT OMX_PTR config) override;
   OMX_ERRORTYPE SetConfig(OMX_IN OMX_INDEXTYPE index, OMX_IN OMX_PTR config) override;

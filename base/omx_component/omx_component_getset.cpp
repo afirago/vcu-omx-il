@@ -216,6 +216,32 @@ static OMX_ERRORTYPE SetFormat(OMX_COLOR_FORMATTYPE const& color, shared_ptr<Med
   return OMX_ErrorNone;
 }
 
+OMX_ERRORTYPE DecSetVideoPortFormat(OMX_VIDEO_PARAM_PORTFORMATTYPE const& format, Port const& port, shared_ptr<MediatypeInterface> media)
+{
+  OMX_VIDEO_PARAM_PORTFORMATTYPE rollback;
+  ConstructVideoPortCurrentFormat(rollback, port, media);
+
+  auto ret = SetClock(format.xFramerate, media);
+
+  if(ret != OMX_ErrorNone)
+  {
+    DecSetVideoPortFormat(rollback, port, media);
+    throw ret;
+  }
+
+  if (!IsInputPort(port.index))
+  {
+    ret = SetFormat(format.eColorFormat, media);
+
+    if(ret != OMX_ErrorNone)
+    {
+      DecSetVideoPortFormat(rollback, port, media);
+      throw ret;
+    }
+  }
+  return OMX_ErrorNone;
+}
+
 OMX_ERRORTYPE SetVideoPortFormat(OMX_VIDEO_PARAM_PORTFORMATTYPE const& format, Port const& port, shared_ptr<MediatypeInterface> media)
 {
   OMX_VIDEO_PARAM_PORTFORMATTYPE rollback;
@@ -344,6 +370,53 @@ static OMX_ERRORTYPE SetTargetBitrate(OMX_U32 bitrate, shared_ptr<MediatypeInter
     curBitrate.max = curBitrate.target;
   ret = media->Set(SETTINGS_INDEX_BITRATE, &curBitrate);
   OMX_CHECK_MEDIA_SET(ret);
+  return OMX_ErrorNone;
+}
+
+OMX_ERRORTYPE DecSetPortDefinition(OMX_PARAM_PORTDEFINITIONTYPE const& settings, Port& port, ModuleInterface& module, shared_ptr<MediatypeInterface> media)
+{
+  OMX_PARAM_PORTDEFINITIONTYPE rollback;
+  ConstructPortDefinition(rollback, port, media);
+  auto video = settings.format.video;
+
+  OMX_ERRORTYPE ret;
+
+  if (!IsInputPort(port.index))
+  {
+    ret = SetFormat(video.eColorFormat, media);
+
+    if(ret != OMX_ErrorNone)
+    {
+      DecSetPortDefinition(rollback, port, module, media);
+      throw ret;
+    }
+  }
+
+  ret = SetClock(video.xFramerate, media);
+
+  if(ret != OMX_ErrorNone)
+  {
+    DecSetPortDefinition(rollback, port, module, media);
+    throw ret;
+  }
+
+  ret = SetResolution(video, media);
+
+  if(ret != OMX_ErrorNone)
+  {
+    DecSetPortDefinition(rollback, port, module, media);
+    throw ret;
+  }
+
+  // Set Target is only used for encoder, ignored for decoder
+  ret = SetTargetBitrate(video.nBitrate, media);
+
+  if(ret != OMX_ErrorNone && ret != OMX_ErrorUnsupportedIndex)
+  {
+    DecSetPortDefinition(rollback, port, module, media);
+    throw ret;
+  }
+
   return OMX_ErrorNone;
 }
 

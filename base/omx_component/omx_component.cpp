@@ -47,15 +47,6 @@
 
 using namespace std;
 
-#define OMX_CATCH_PARAMETER_OR_CONFIG() \
-  } \
-  catch(OMX_ERRORTYPE& e) \
-  { \
-    LOG_ERROR(ToStringOMXIndex(index) + string { ": " } +ToStringOMXError(e)); \
-    return e; \
-  } \
-  void FORCE_SEMICOLON()
-
 static void ClearPropagatedData(OMX_BUFFERHEADERTYPE* header)
 {
   header->hMarkTargetComponent = nullptr;
