@@ -40,6 +40,7 @@ extern "C" {
  * for this header file to compile successfully
  */
 #include <OMX_Video.h>
+#include <OMX_VideoExt.h>
 #include <OMX_IVCommonAlg.h>
 
 /** Enum for vendor video codingtype extensions */
@@ -95,6 +96,34 @@ typedef enum OMX_ALG_VIDEO_HEVCPROFILETYPE
   OMX_ALG_VIDEO_HEVCProfileMaxEnum = 0x7FFFFFFF,
 }OMX_ALG_VIDEO_HEVCPROFILETYPE;
 
+#ifdef ANDROID
+typedef enum OMX_ALG_VIDEO_HEVCLEVELTYPE
+{
+  OMX_ALG_VIDEO_HEVCLevelUnknown = OMX_VIDEO_HEVCLevelUnknown,
+  OMX_ALG_VIDEO_HEVCMainTierLevel1 = OMX_VIDEO_HEVCMainTierLevel1,
+  OMX_ALG_VIDEO_HEVCMainTierLevel2 = OMX_VIDEO_HEVCMainTierLevel2,
+  OMX_ALG_VIDEO_HEVCMainTierLevel21 = OMX_VIDEO_HEVCMainTierLevel21,
+  OMX_ALG_VIDEO_HEVCMainTierLevel3 = OMX_VIDEO_HEVCMainTierLevel3,
+  OMX_ALG_VIDEO_HEVCMainTierLevel31 = OMX_VIDEO_HEVCMainTierLevel31,
+  OMX_ALG_VIDEO_HEVCMainTierLevel4 = OMX_VIDEO_HEVCMainTierLevel4,
+  OMX_ALG_VIDEO_HEVCHighTierLevel4 = OMX_VIDEO_HEVCHighTierLevel4,
+  OMX_ALG_VIDEO_HEVCMainTierLevel41 = OMX_VIDEO_HEVCMainTierLevel41,
+  OMX_ALG_VIDEO_HEVCHighTierLevel41 = OMX_VIDEO_HEVCHighTierLevel41,
+  OMX_ALG_VIDEO_HEVCMainTierLevel5 = OMX_VIDEO_HEVCMainTierLevel5,
+  OMX_ALG_VIDEO_HEVCHighTierLevel5 = OMX_VIDEO_HEVCHighTierLevel5,
+  OMX_ALG_VIDEO_HEVCMainTierLevel51 = OMX_VIDEO_HEVCMainTierLevel51,
+  OMX_ALG_VIDEO_HEVCHighTierLevel51 = OMX_VIDEO_HEVCHighTierLevel51,
+  OMX_ALG_VIDEO_HEVCMainTierLevel52 = OMX_VIDEO_HEVCMainTierLevel52,
+  OMX_ALG_VIDEO_HEVCHighTierLevel52 = OMX_VIDEO_HEVCHighTierLevel52,
+  OMX_ALG_VIDEO_HEVCMainTierLevel6 = OMX_VIDEO_HEVCMainTierLevel6,
+  OMX_ALG_VIDEO_HEVCHighTierLevel6 = OMX_VIDEO_HEVCHighTierLevel6,
+  OMX_ALG_VIDEO_HEVCMainTierLevel61 = OMX_VIDEO_HEVCMainTierLevel61,
+  OMX_ALG_VIDEO_HEVCHighTierLevel61 = OMX_VIDEO_HEVCHighTierLevel61,
+  OMX_ALG_VIDEO_HEVCMainTierLevel62 = OMX_VIDEO_HEVCMainTierLevel62,
+  OMX_ALG_VIDEO_HEVCHighTierLevel62 = OMX_VIDEO_HEVCHighTierLevel62,
+  OMX_ALG_VIDEO_HEVCLevelMaxEnum = OMX_VIDEO_HEVCHighTiermax,
+}OMX_ALG_VIDEO_HEVCLEVELTYPE;
+#else
 /** HEVC levels */
 typedef enum OMX_ALG_VIDEO_HEVCLEVELTYPE
 {
@@ -122,6 +151,7 @@ typedef enum OMX_ALG_VIDEO_HEVCLEVELTYPE
   OMX_ALG_VIDEO_HEVCHighTierLevel62,
   OMX_ALG_VIDEO_HEVCLevelMaxEnum = 0x7FFFFFFF,
 }OMX_ALG_VIDEO_HEVCLEVELTYPE;
+#endif /* ANDROID */
 
 /** HEVC Param */
 typedef struct OMX_ALG_VIDEO_PARAM_HEVCTYPE
