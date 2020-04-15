@@ -102,7 +102,9 @@ LOCAL_CPPFLAGS := \
 
 LOCAL_C_INCLUDES := \
 	frameworks/native/include/media/openmax \
+	frameworks/native/libs/nativebase/include \
 	hardware/xilinx/vcu/vcu-ctrl-sw/include \
+	device/xilinx/common/gralloc \
 	$(LOCAL_PATH)/omx_header_for_android
 
 OMX_COMPONENT_DEC_SRCS := \

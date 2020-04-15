@@ -38,6 +38,15 @@
 #include "omx_component_dec.h"
 #include "omx_component_getset.h"
 
+#ifdef ANDROID
+#include <media/hardware/HardwareAPI.h>
+#include <system/graphics.h>
+#include <nativebase/nativebase.h>
+#include <hardware/gralloc.h>
+#include <gralloc_priv.h>
+#include <sys/mman.h>
+#endif
+
 #include <OMX_VideoExt.h>
 #include <OMX_ComponentAlg.h>
 #include <OMX_IVCommonAlg.h>
@@ -422,7 +431,21 @@ OMX_ERRORTYPE DecComponent::GetParameter(OMX_IN OMX_INDEXTYPE index, OMX_INOUT O
   {
     auto port = getCurrentPort(param);
     auto def = static_cast<OMX_PARAM_PORTDEFINITIONTYPE*>(param);
-    return ConstructPortDefinition(*def, *port, media);
+    OMX_ERRORTYPE err = ConstructPortDefinition(*def, *port, media);
+    if (err)
+      return err;
+#ifdef ANDROID
+    OMX_ALG_PORT_PARAM_BUFFER_MODE buf_mode;
+    err = ConstructPortBufferMode(buf_mode, *port, media);
+    if (err)
+      return err;
+    if (buf_mode.eMode == OMX_ALG_BUF_DMA)
+    {
+      if (def->format.video.eColorFormat == OMX_COLOR_FormatYUV420SemiPlanar)
+        def->format.video.eColorFormat = (OMX_COLOR_FORMATTYPE)HAL_PIXEL_FORMAT_YCbCr_420_888;
+    }
+#endif
+    return OMX_ErrorNone;
   }
   case OMX_IndexParamCompBufferSupplier:
   {
@@ -437,9 +460,19 @@ OMX_ERRORTYPE DecComponent::GetParameter(OMX_IN OMX_INDEXTYPE index, OMX_INOUT O
     OMX_ERRORTYPE err = GetVideoPortFormatSupported(*p, media);
     if (err)
       return err;
-    if (IsInputPort(port->index)){
-      p->eColorFormat = OMX_COLOR_FormatUnused;
+#ifdef ANDROID
+    OMX_ALG_PORT_PARAM_BUFFER_MODE buf_mode;
+    err = ConstructPortBufferMode(buf_mode, *port, media);
+    if (err)
+      return err;
+    if (buf_mode.eMode == OMX_ALG_BUF_DMA)
+    {
+      if (p->eColorFormat == OMX_COLOR_FormatYUV420SemiPlanar)
+        p->eColorFormat = (OMX_COLOR_FORMATTYPE)HAL_PIXEL_FORMAT_YCbCr_420_888;
     }
+#endif
+    if (IsInputPort(port->index))
+      p->eColorFormat = OMX_COLOR_FormatUnused;
     return OMX_ErrorNone;
   }
   case OMX_IndexParamVideoProfileLevelCurrent:
@@ -690,6 +723,21 @@ OMX_ERRORTYPE DecComponent::GetParameter(OMX_IN OMX_INDEXTYPE index, OMX_INOUT O
     auto qpTable = static_cast<OMX_ALG_VIDEO_PARAM_QUANTIZATION_TABLE*>(param);
     return ConstructVideoQuantizationTable(*qpTable, *port, media);
   }
+#ifdef ANDROID
+  case OMX_ALG_IndexExtGetNativeBufferUsage:
+  {
+    LOG_IMPORTANT("OMX_ALG_IndexExtGetNativeBufferUsage");
+    auto const port = getCurrentPort(param);
+    android::GetAndroidNativeBufferUsageParams* usg_param = (android::GetAndroidNativeBufferUsageParams*)param;
+    if (IsInputPort(port->index))
+    {
+      LOG_ERROR("OMX_ALG_IndexExtGetNativeBufferUsage called on input port. Not supported");
+      return OMX_ErrorBadParameter;
+    }
+    usg_param->nUsage = GRALLOC_USAGE_PRIVATE_2;
+    return OMX_ErrorNone;
+  }
+#endif
   default:
     LOG_ERROR(ToStringOMXIndex(index) + string { " is unsupported" });
     return OMX_ErrorUnsupportedIndex;
@@ -743,6 +791,18 @@ OMX_ERRORTYPE DecComponent::SetParameter(OMX_IN OMX_INDEXTYPE index, OMX_IN OMX_
   {
     auto settings = static_cast<OMX_PARAM_PORTDEFINITIONTYPE*>(param);
     SetPortExpectedBuffer(*settings, const_cast<Port &>(*port), media);
+#ifdef ANDROID
+    OMX_ALG_PORT_PARAM_BUFFER_MODE buf_mode;
+    OMX_ERRORTYPE err;
+    err = ConstructPortBufferMode(buf_mode, *port, media);
+    if (err)
+      return err;
+    if (buf_mode.eMode == OMX_ALG_BUF_DMA)
+    {
+      if (settings->format.video.eColorFormat == (OMX_COLOR_FORMATTYPE)HAL_PIXEL_FORMAT_YCbCr_420_888)
+        settings->format.video.eColorFormat = OMX_COLOR_FormatYUV420SemiPlanar;
+    }
+#endif
     return DecSetPortDefinition(*settings, *port, *module, media);
   }
   case OMX_IndexParamCompBufferSupplier:
@@ -758,6 +818,18 @@ OMX_ERRORTYPE DecComponent::SetParameter(OMX_IN OMX_INDEXTYPE index, OMX_IN OMX_
   case OMX_IndexParamVideoPortFormat:
   {
     auto format = static_cast<OMX_VIDEO_PARAM_PORTFORMATTYPE*>(param);
+#if ANDROID
+    OMX_ALG_PORT_PARAM_BUFFER_MODE buf_mode;
+    OMX_ERRORTYPE err;
+    err = ConstructPortBufferMode(buf_mode, *port, media);
+    if (err)
+      return err;
+    if (buf_mode.eMode == OMX_ALG_BUF_DMA)
+    {
+      if (format->eColorFormat == (OMX_COLOR_FORMATTYPE)HAL_PIXEL_FORMAT_YCbCr_420_888)
+        format->eColorFormat = OMX_COLOR_FormatYUV420SemiPlanar;
+    }
+#endif
     return DecSetVideoPortFormat(*format, *port, media);
   }
   case OMX_IndexParamVideoProfileLevelCurrent:
@@ -948,6 +1020,42 @@ OMX_ERRORTYPE DecComponent::SetParameter(OMX_IN OMX_INDEXTYPE index, OMX_IN OMX_
     auto table = static_cast<OMX_ALG_VIDEO_PARAM_QUANTIZATION_TABLE*>(param);
     return SetVideoQuantizationTable(*table, *port, media);
   }
+#ifdef ANDROID
+  case OMX_ALG_IndexExtEnableNativeBuffer:
+  {
+    LOG_IMPORTANT("OMX_ALG_IndexExtEnableNativeBuffer");
+    auto const port = getCurrentPort(param);
+    auto const android_buf_mode = (android::EnableAndroidNativeBuffersParams*)param;
+    OMX_ALG_PORT_PARAM_BUFFER_MODE alg_buf_mode;
+    OMXChecker::SetHeaderVersion(alg_buf_mode);
+    alg_buf_mode.nPortIndex = port->index;
+
+    if (android_buf_mode->enable == OMX_TRUE)
+      alg_buf_mode.eMode = OMX_ALG_BUF_DMA;
+    else
+      alg_buf_mode.eMode = OMX_ALG_BUF_NORMAL;
+
+    auto portBufferMode = static_cast<OMX_ALG_PORT_PARAM_BUFFER_MODE*>(param);
+    return SetPortBufferMode(alg_buf_mode, *port, media);
+  }
+  case OMX_ALG_IndexExtUseNativeBuffer:
+  {
+    LOG_IMPORTANT("OMX_ALG_IndexExtUseNativeBuffer");
+    auto const port = getCurrentPort(param);
+    if(IsInputPort(port->index))
+      return OMX_ErrorBadParameter;
+
+    auto buf_params = (android::UseAndroidNativeBufferParams *)(param);
+    if (buf_params->nativeBuffer == NULL || buf_params->nativeBuffer->handle == NULL)
+      return OMX_ErrorBadParameter;
+
+    android::sp<android_native_buffer_t> nBuf = buf_params->nativeBuffer;
+    private_handle_t *handle = (private_handle_t *)nBuf->handle;
+    OMX_U8 *buffer = NULL;
+    buffer = (OMX_U8*)(uintptr_t)(handle->share_fd);
+    return UseBuffer(buf_params->bufferHeader, buf_params->nPortIndex, buf_params->pAppPrivate, handle->size, buffer);
+  }
+#endif
   default:
     LOG_ERROR(ToStringOMXIndex(index) + string { " is unsupported" });
     return OMX_ErrorUnsupportedIndex;

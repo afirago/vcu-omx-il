@@ -1453,6 +1453,25 @@ OMX_ERRORTYPE Component::GetExtensionIndex(OMX_IN OMX_STRING name, OMX_OUT OMX_I
   OMXChecker::CheckNotNull(name);
   OMXChecker::CheckNotNull(index);
   OMXChecker::CheckStateOperation(OMXChecker::ComponentMethods::GetExtensionIndex, state);
+
+  if (!strcmp(name, "OMX.google.android.index.enableAndroidNativeBuffers"))
+  {
+    *index = static_cast<OMX_INDEXTYPE>(OMX_ALG_IndexExtEnableNativeBuffer);
+    return OMX_ErrorNone;
+  }
+
+  if (!strcmp(name, "OMX.google.android.index.getAndroidNativeBufferUsage"))
+  {
+    *index = static_cast<OMX_INDEXTYPE>(OMX_ALG_IndexExtGetNativeBufferUsage);
+    return OMX_ErrorNone;
+  }
+
+  if (!strcmp(name, "OMX.google.android.index.useAndroidNativeBuffer"))
+  {
+    *index = static_cast<OMX_INDEXTYPE>(OMX_ALG_IndexExtUseNativeBuffer);
+    return OMX_ErrorNone;
+  }
+
   return OMX_ErrorNoMore;
   OMX_CATCH();
 }
