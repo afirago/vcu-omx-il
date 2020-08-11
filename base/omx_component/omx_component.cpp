@@ -233,6 +233,9 @@ Component::Component(OMX_HANDLETYPE component, shared_ptr<MediatypeInterface> me
   shouldClearROI = false;
   shouldPushROI = false;
   shouldFireEventPortSettingsChanges = true;
+#ifdef ANDROID
+  inputMetaDataBufferMode = false;
+#endif
   version.nVersion = ALLEGRODVT_OMX_VERSION;
   AssociateSpecVersion(spec);
 
@@ -1201,6 +1204,9 @@ OMX_ERRORTYPE Component::FillThisBuffer(OMX_IN OMX_BUFFERHEADERTYPE* header)
 
 void Component::ComponentDeInit()
 {
+#ifdef ANDROID
+  inputMetaDataBufferMode = false;
+#endif
   if(eosHandles.input)
   {
     delete eosHandles.input;
@@ -1469,6 +1475,12 @@ OMX_ERRORTYPE Component::GetExtensionIndex(OMX_IN OMX_STRING name, OMX_OUT OMX_I
   if (!strcmp(name, "OMX.google.android.index.useAndroidNativeBuffer"))
   {
     *index = static_cast<OMX_INDEXTYPE>(OMX_ALG_IndexExtUseNativeBuffer);
+    return OMX_ErrorNone;
+  }
+
+  if (!strcmp(name, "OMX.google.android.index.storeANWBufferInMetadata"))
+  {
+    *index = static_cast<OMX_INDEXTYPE>(OMX_ALG_IndexExtStoreMetaDataInBuffers);
     return OMX_ErrorNone;
   }
 

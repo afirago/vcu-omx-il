@@ -44,6 +44,16 @@
 
 #include <cmath>
 
+#ifdef ANDROID
+#include <media/hardware/HardwareAPI.h>
+#include <system/graphics.h>
+#include <hardware/gralloc.h>
+#include <gralloc_priv.h>
+#include <sys/mman.h>
+#include <hardware/gralloc.h>
+#include <nativebase/nativebase.h>
+#endif
+
 #include "base/omx_checker/omx_checker.h"
 
 #include "omx_component_getset.h"
@@ -325,6 +335,9 @@ void EncComponent::TreatEmptyBufferCommand(Task* task)
   assert(static_cast<int>((intptr_t)task->data) == input.index);
   auto header = static_cast<OMX_BUFFERHEADERTYPE*>(task->opt.get());
   assert(header);
+#ifdef ANDROID
+  private_handle_t *ph = NULL;
+#endif
 
   if(state == OMX_StateInvalid)
   {
@@ -333,6 +346,33 @@ void EncComponent::TreatEmptyBufferCommand(Task* task)
   }
 
   AttachMark(header);
+
+#ifdef ANDROID
+  if (inputMetaDataBufferMode)
+  {
+    OMX_U32 *pTempBuffer;
+    OMX_U32 nMetadataBufferType;
+    pTempBuffer = (OMX_U32 *) (header->pBuffer);
+    nMetadataBufferType = *pTempBuffer;
+    if (nMetadataBufferType == android::kMetadataBufferTypeANWBuffer)
+    {
+      android::VideoNativeMetadata * nativeMeta =
+      (android::VideoNativeMetadata *)(header->pBuffer + header->nOffset);
+
+      if (nativeMeta->pBuffer)
+      {
+        ANativeWindowBuffer *anw = nativeMeta->pBuffer;
+        ph = (private_handle_t *)anw->handle;
+      }
+    }
+    else
+    {
+        android::VideoGrallocMetadata &grallocMeta =
+        *(android::VideoGrallocMetadata *)(header->pBuffer + header->nOffset);
+        ph = (private_handle_t *)grallocMeta.pHandle;
+    }
+  }
+#endif
 
   if(header->nFilledLen == 0)
   {
@@ -356,7 +396,15 @@ void EncComponent::TreatEmptyBufferCommand(Task* task)
     roiMap.Add(header, roiBuffer);
   }
 
-  auto handle = new OMXBufferHandle(header);
+  OMXBufferHandle * handle;
+#ifdef ANDROID
+  if (ph)
+    handle = new OMXBufferHandle(ph, header);
+  else
+    handle = new OMXBufferHandle(header);
+#else
+  handle = new OMXBufferHandle(header);
+#endif
 
   seisMap.Add(handle, move(tmpSeis));
   auto success = module->Empty(handle);
@@ -411,6 +459,7 @@ OMX_ERRORTYPE EncComponent::SetParameter(OMX_IN OMX_INDEXTYPE index, OMX_IN OMX_
     if(!port->isTransientToDisable && port->enable)
       OMXChecker::CheckStateOperation(OMXChecker::ComponentMethods::SetParameter, state);
   }
+
   switch(static_cast<OMX_U32>(index)) // all indexes are 32u
   {
   case OMX_IndexParamStandardComponentRole:
@@ -432,6 +481,11 @@ OMX_ERRORTYPE EncComponent::SetParameter(OMX_IN OMX_INDEXTYPE index, OMX_IN OMX_
   {
     auto settings = static_cast<OMX_PARAM_PORTDEFINITIONTYPE*>(param);
     SetPortExpectedBuffer(*settings, const_cast<Port &>(*port), media);
+#ifdef ANDROID
+  if (settings->format.video.eColorFormat == OMX_COLOR_FormatAndroidOpaque)
+    settings->format.video.eColorFormat = OMX_COLOR_FormatYUV420SemiPlanar;
+#endif
+
     return EncSetPortDefinition(*settings, *port, *module, media);
   }
   case OMX_IndexParamCompBufferSupplier:
@@ -447,6 +501,10 @@ OMX_ERRORTYPE EncComponent::SetParameter(OMX_IN OMX_INDEXTYPE index, OMX_IN OMX_
   case OMX_IndexParamVideoPortFormat:
   {
     auto format = static_cast<OMX_VIDEO_PARAM_PORTFORMATTYPE*>(param);
+#ifdef ANDROID
+    if (format->eColorFormat == OMX_COLOR_FormatAndroidOpaque)
+        format->eColorFormat = OMX_COLOR_FormatYUV420SemiPlanar;
+#endif
     return EncSetVideoPortFormat(*format, *port, media);
   }
   case OMX_IndexParamVideoProfileLevelCurrent:
@@ -654,6 +712,38 @@ OMX_ERRORTYPE EncComponent::SetParameter(OMX_IN OMX_INDEXTYPE index, OMX_IN OMX_
 
     return expertise->SetProfileLevel((OMX_PTR)(&levelType), *port, media);
   }
+#ifdef ANDROID
+  case OMX_ALG_IndexExtStoreMetaDataInBuffers:
+  {
+    LOG_IMPORTANT("OMX_ALG_IndexExtStoreMetaDataInBuffers");
+    auto const port = getCurrentPort(param);
+    android::StoreMetaDataInBuffersParams* store_param = (android::StoreMetaDataInBuffersParams*)param;
+    if (!IsInputPort(port->index))
+    {
+      LOG_ERROR("OMX_ALG_IndexExtStoreMetaDataInBuffers called on output port. Not supported");
+      return OMX_ErrorUnsupportedSetting;
+    }
+
+    OMX_ALG_PORT_PARAM_BUFFER_MODE alg_buf_mode;
+    OMXChecker::SetHeaderVersion(alg_buf_mode);
+    alg_buf_mode.nPortIndex = port->index;
+
+    if (store_param->bStoreMetaData == OMX_TRUE)
+    {
+      LOG_IMPORTANT("Enabling Android Metadata mode");
+      inputMetaDataBufferMode = true;
+      alg_buf_mode.eMode = OMX_ALG_BUF_DMA;
+    }
+    else
+    {
+      inputMetaDataBufferMode = false;
+      alg_buf_mode.eMode = OMX_ALG_BUF_NORMAL;
+    }
+
+    auto portBufferMode = static_cast<OMX_ALG_PORT_PARAM_BUFFER_MODE*>(param);
+    return SetPortBufferMode(alg_buf_mode, *port, media);
+  }
+#endif
   default:
     LOG_ERROR(ToStringOMXIndex(index) + string { " is unsupported" });
     return OMX_ErrorUnsupportedIndex;
@@ -676,6 +766,8 @@ OMX_ERRORTYPE EncComponent::GetParameter(OMX_IN OMX_INDEXTYPE index, OMX_INOUT O
                           auto index = *(((OMX_U32*)param) + 2);
                           return GetPort(index);
                         };
+  auto ppp = getCurrentPort(param);
+
   switch(static_cast<OMX_U32>(index)) // all indexes are 32u
   {
   case OMX_IndexParamVideoInit:
@@ -694,6 +786,17 @@ OMX_ERRORTYPE EncComponent::GetParameter(OMX_IN OMX_INDEXTYPE index, OMX_INOUT O
     auto port = getCurrentPort(param);
     auto def = static_cast<OMX_PARAM_PORTDEFINITIONTYPE*>(param);
     OMX_ERRORTYPE err = ConstructPortDefinition(*def, *port, media);
+
+#ifdef ANDROID
+    if (!IsInputPort(port->index))
+      def->format.video.eColorFormat = OMX_COLOR_FormatUnused;
+    else {
+      def->format.video.eCompressionFormat = OMX_VIDEO_CodingUnused;
+      if (inputMetaDataBufferMode)
+        def->format.video.eColorFormat = OMX_COLOR_FormatAndroidOpaque;
+    }
+#endif
+
     if (err)
       return err;
     return OMX_ErrorNone;
@@ -708,13 +811,29 @@ OMX_ERRORTYPE EncComponent::GetParameter(OMX_IN OMX_INDEXTYPE index, OMX_INOUT O
   {
     auto p = (OMX_VIDEO_PARAM_PORTFORMATTYPE*)param;
     auto port = getCurrentPort(param);
+
+#ifdef ANDROID
+    if (p->nIndex == 5)
+      p->eColorFormat = OMX_COLOR_FormatAndroidOpaque;
+    else
+    {
+      OMX_ERRORTYPE err = GetVideoPortFormatSupported(*p, media);
+      if (err)
+        return err;
+    }
+#else
     OMX_ERRORTYPE err = GetVideoPortFormatSupported(*p, media);
     if (err)
       return err;
+#endif
+
+#ifdef ANDROID
     if (!IsInputPort(port->index))
       p->eColorFormat = OMX_COLOR_FormatUnused;
-    else
+    else {
       p->eCompressionFormat = OMX_VIDEO_CodingUnused;
+    }
+#endif
     return OMX_ErrorNone;
   }
   case OMX_IndexParamVideoProfileLevelCurrent:

@@ -41,11 +41,21 @@
 
 #include <OMX_Core.h>
 
+#ifdef ANDROID
+#include <gralloc_priv.h>
+#endif
+
 struct OMXBufferHandle : BufferHandleInterface
 {
   OMXBufferHandle(OMX_BUFFERHEADERTYPE* header);
+#ifdef ANDROID
+  OMXBufferHandle(private_handle_t* handle, OMX_BUFFERHEADERTYPE* header);
+#endif
   ~OMXBufferHandle() override;
 
   OMX_BUFFERHEADERTYPE* const header;
+#ifdef ANDROID
+  private_handle_t* const handle;
+#endif
 };
 

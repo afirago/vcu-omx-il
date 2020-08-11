@@ -38,10 +38,21 @@
 #include "omx_buffer_handle.h"
 
 OMXBufferHandle::OMXBufferHandle(OMX_BUFFERHEADERTYPE* header) : BufferHandleInterface((char*)header->pBuffer, header->nAllocLen), header(header)
+#ifdef ANDROID
+  ,handle(NULL)
+#endif
 {
   offset = header->nOffset;
   payload = header->nFilledLen;
 }
+
+#ifdef ANDROID
+OMXBufferHandle::OMXBufferHandle(private_handle_t* handle, OMX_BUFFERHEADERTYPE* header) : BufferHandleInterface((char*)(uintptr_t)(handle->share_fd), handle->size), header(header), handle(handle)
+{
+  offset = handle->offset;
+  payload = handle->size;
+}
+#endif
 
 OMXBufferHandle::~OMXBufferHandle() = default;
 

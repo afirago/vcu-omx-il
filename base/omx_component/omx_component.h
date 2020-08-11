@@ -137,6 +137,9 @@ protected:
   bool shouldClearROI;
   bool shouldPushROI;
   bool shouldFireEventPortSettingsChanges;
+#ifdef ANDROID
+  bool inputMetaDataBufferMode;
+#endif
   std::vector<OMXSei> tmpSeis;
 
   OMX_STRING name;
